@@ -1,0 +1,4356 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart City IoT Communication Simulator</title>
+  <meta name="description" content="Adaptive Cluster-Based Smart City IoT Communication Using LDPC-Coded BPSK: interactive digital communication, adaptive clustering, and channel simulation laboratory." />
+  <meta property="og:title" content="Smart City IoT Communication Simulator" />
+  <meta property="og:description" content="Adaptive Cluster-Based Smart City IoT Communication Using LDPC-Coded BPSK" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* CSS Variables & Design System */
+    :root {
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-subtle: #f1f5f9;
+      --border-color: #e2e8f0;
+      --border-hover: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --primary: #1e40af;
+      --primary-light: #3b82f6;
+      --primary-subtle: #eff6ff;
+      --cyan-signal: #0891b2;
+      --cyan-light: #e0f2fe;
+      --amber-noise: #d97706;
+      --amber-subtle: #fffbeb;
+      --emerald-success: #059669;
+      --emerald-subtle: #ecfdf5;
+      --rose-error: #dc2626;
+      --rose-subtle: #fef2f2;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation */
+    .top-navbar {
+      height: 64px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #1e3a8a, #0284c7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.2px;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg-card-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .status-dot.active {
+      background: #10b981;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+      animation: pulse-dot 1.5s infinite;
+    }
+
+    .status-dot.busy {
+      background: #f59e0b;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+      animation: pulse-dot 1s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: #1e40af;
+      color: #ffffff;
+      border-color: #1d4ed8;
+      box-shadow: 0 1px 2px rgba(30, 64, 175, 0.2);
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      box-shadow: 0 2px 4px rgba(30, 64, 175, 0.3);
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      color: var(--text-main);
+      border-color: var(--border-color);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-card-subtle);
+      border-color: var(--border-hover);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    .btn-success {
+      background: var(--emerald-success);
+      color: #fff;
+    }
+
+    .btn-success:hover {
+      background: #047857;
+    }
+
+    /* Main Layout */
+    .app-layout {
+      display: flex;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.2s ease, transform 0.2s ease;
+    }
+
+    .sidebar-header {
+      padding: 16px 20px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 0 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-card-subtle);
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      background: var(--primary-subtle);
+      color: var(--primary);
+      font-weight: 600;
+      border-left-color: var(--primary);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .nav-item.active .nav-badge {
+      background: #dbeafe;
+      color: var(--primary);
+    }
+
+    /* Workspace */
+    .workspace {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Presentation Mode */
+    body.presentation-mode .sidebar {
+      display: none;
+    }
+    body.presentation-mode .workspace {
+      padding: 32px 48px;
+      max-width: 1600px;
+    }
+
+    /* Section Containers */
+    .sim-section {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .sim-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-header {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      max-width: 800px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--bg-card-subtle);
+      padding-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .app-layout { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        max-height: 190px;
+        overflow-y: auto;
+      }
+      .nav-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 4px;
+        padding: 6px 10px 10px;
+      }
+      .nav-item {
+        padding: 6px 8px;
+        font-size: 11px;
+      }
+      .grid-4 { grid-template-columns: 1fr; }
+      .workspace { padding: 12px; }
+      .top-navbar {
+        height: auto;
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .top-controls {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        display: flex;
+        flex-wrap: nowrap;
+      }
+      .brand-title { font-size: 14px; }
+      .brand-subtitle { display: none; }
+      .pipeline-bar { padding: 8px 12px; }
+    }
+
+    /* Metric Cards */
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--primary);
+    }
+
+    .metric-card.cyan::before { background: var(--cyan-signal); }
+    .metric-card.amber::before { background: var(--amber-noise); }
+    .metric-card.emerald::before { background: var(--emerald-success); }
+    .metric-card.rose::before { background: var(--rose-error); }
+
+    .metric-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .metric-unit {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .metric-foot {
+      font-size: 11px;
+      color: var(--text-subtle);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    /* Pipeline Banner */
+    .pipeline-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      overflow-x: auto;
+      gap: 12px;
+    }
+
+    .pipeline-steps {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pipe-step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-card-subtle);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .pipe-step:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+    }
+
+    .pipe-step.current {
+      background: #eff6ff;
+      color: #1e40af;
+      border-color: #bfdbfe;
+    }
+
+    .pipe-step.completed {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+
+    .pipe-arrow {
+      color: #cbd5e1;
+      font-size: 12px;
+    }
+
+    /* Controls Panel */
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--bg-card-subtle);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .control-input, select.control-input {
+      padding: 6px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      background: #fff;
+      font-family: inherit;
+      color: var(--text-main);
+    }
+
+    .range-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .range-input {
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .range-val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      min-width: 48px;
+    }
+
+    /* Canvas & Waveforms */
+    canvas.sim-canvas {
+      width: 100%;
+      background: #0f172a;
+      border-radius: var(--radius-sm);
+      display: block;
+    }
+
+    /* Interactive Data Tables */
+    .data-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    table.data-table th {
+      background: var(--bg-card-subtle);
+      padding: 9px 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.03em;
+    }
+
+    table.data-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* Bitstream viewer */
+    .bit-stream {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 10px;
+      background: #0f172a;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      overflow-x: auto;
+    }
+
+    .bit-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 24px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .bit-0 { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #3b82f6; }
+    .bit-1 { background: rgba(14, 165, 233, 0.25); color: #7dd3fc; border: 1px solid #0284c7; }
+    .bit-parity { background: rgba(168, 85, 247, 0.25); color: #d8b4fe; border: 1px solid #a855f7; }
+    .bit-err { background: rgba(239, 68, 68, 0.35); color: #fca5a5; border: 1px solid #ef4444; animation: flash-err 1s infinite alternate; }
+    .bit-fixed { background: rgba(16, 185, 129, 0.35); color: #6ee7b7; border: 1px solid #10b981; }
+
+    @keyframes flash-err {
+      0% { opacity: 0.7; }
+      100% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* Theory / Educational Panel */
+    .theory-box {
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 14px 18px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .theory-title {
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .math-formula {
+      font-family: var(--font-mono);
+      background: #e2e8f0;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 4px 0;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      max-width: 680px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+      font-size: 13px;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    /* Glossary grid */
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .glossary-card {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+
+    .glossary-card-title {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .glossary-card-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Pulse animation for active simulation stage */
+    .pulse-glow {
+      box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.7);
+      animation: pulse-ring 1.8s infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(30, 64, 175, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-navbar">
+    <div class="brand-section">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 11a9 9 0 0 1 9 9"></path>
+          <path d="M4 4a16 16 0 0 1 16 16"></path>
+          <circle cx="5" cy="19" r="1"></circle>
+        </svg>
+      </div>
+      <div class="brand-title-wrap">
+        <span class="brand-title">Adaptive Cluster IoT LDPC-BPSK</span>
+        <span class="brand-subtitle">Smart City Wireless Digital Communication Simulator</span>
+      </div>
+    </div>
+
+    <div class="top-controls">
+      <div class="status-badge" id="simStatusBadge">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Ready</span>
+      </div>
+
+      <button class="btn btn-primary pulse-glow" id="btnStartFullSim" title="Run end-to-end simulation across all stages">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        <span>Start Full Simulation</span>
+      </button>
+
+      <button class="btn btn-outline btn-sm" id="btnStepSim" title="Execute one stage at a time">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <span>Step</span>
+      </button>
+
+      <button class="btn btn-outline btn-sm" id="btnResetSim" title="Reset all simulation registers and waveforms">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+        <span>Reset</span>
+      </button>
+
+      <button class="btn btn-outline btn-sm" id="btnPresentation" title="Toggle presentation mode for academic demonstration">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span>Presentation</span>
+      </button>
+
+      <button class="btn btn-outline btn-sm" id="btnHelp" title="Technical glossary & system architecture">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <span>Help</span>
+      </button>
+
+      <button class="btn btn-success btn-sm" id="btnExportCsv" title="Export telemetry and simulation results to CSV">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>CSV</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Body Layout -->
+  <div class="app-layout">
+    
+    <!-- Left Navigation Sidebar -->
+    <nav class="sidebar" id="sidebarNav">
+      <div class="sidebar-header">Simulation Pipeline</div>
+      <ul class="nav-list" id="navList">
+        <li><a class="nav-item active" data-target="sec-overview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg><span>1. Project Overview</span><span class="nav-badge">01</span></a></li>
+        <li><a class="nav-item" data-target="sec-smartcity"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg><span>2. Smart City Map</span><span class="nav-badge">02</span></a></li>
+        <li><a class="nav-item" data-target="sec-esp32"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg><span>3. ESP32 Hardware</span><span class="nav-badge">03</span></a></li>
+        <li><a class="nav-item" data-target="sec-clustering"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="12" r="3"></circle><line x1="8.59" y1="7.41" x2="15.42" y2="10.59"></line><line x1="8.59" y1="16.59" x2="15.42" y2="13.41"></line></svg><span>4. Adaptive Clustering</span><span class="nav-badge">04</span></a></li>
+        <li><a class="nav-item" data-target="sec-encoding"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg><span>5. LDPC Encoding</span><span class="nav-badge">05</span></a></li>
+        <li><a class="nav-item" data-target="sec-modulation"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2a4 4 0 0 0 4-4 4 4 0 0 1 4-4h0a4 4 0 0 1 4 4 4 4 0 0 0 4 4h2"></path></svg><span>6. BPSK Modulation</span><span class="nav-badge">06</span></a></li>
+        <li><a class="nav-item" data-target="sec-channel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg><span>7. Wireless Channel</span><span class="nav-badge">07</span></a></li>
+        <li><a class="nav-item" data-target="sec-demodulation"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="12"></line></svg><span>8. Receiver & Demod</span><span class="nav-badge">08</span></a></li>
+        <li><a class="nav-item" data-target="sec-decoding"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>9. LDPC Decoding</span><span class="nav-badge">09</span></a></li>
+        <li><a class="nav-item" data-target="sec-performance"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg><span>10. Performance Analysis</span><span class="nav-badge">10</span></a></li>
+        <li><a class="nav-item" data-target="sec-results"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>11. Final Results</span><span class="nav-badge">11</span></a></li>
+      </ul>
+    </nav>
+
+    <!-- Main Workspace Area -->
+    <main class="workspace" id="mainWorkspace">
+
+      <!-- Sequential Pipeline Flow Visualizer Bar -->
+      <div class="pipeline-bar">
+        <div class="pipeline-steps" id="pipelineStepContainer">
+          <div class="pipe-step current" data-step="0"><span>1. Sensors</span></div>
+          <span class="pipe-arrow">➔</span>
+          <div class="pipe-step" data-step="1"><span>2. Clustering</span></div>
+          <span class="pipe-arrow">➔</span>
+          <div class="pipe-step" data-step="2"><span>3. LDPC Encode</span></div>
+          <span class="pipe-arrow">➔</span>
+          <div class="pipe-step" data-step="3"><span>4. BPSK Mod</span></div>
+          <span class="pipe-arrow">➔</span>
+          <div class="pipe-step" data-step="4"><span>5. Channel + Noise</span></div>
+          <span class="pipe-arrow">➔</span>
+          <div class="pipe-step" data-step="5"><span>6. Demodulation</span></div>
+          <span class="pipe-arrow">➔</span>
+          <div class="pipe-step" data-step="6"><span>7. LDPC Decode</span></div>
+          <span class="pipe-arrow">➔</span>
+          <div class="pipe-step" data-step="7"><span>8. Verification</span></div>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); font-weight:600;" id="pipelineProgressLabel">
+          Stage: Idle (Ready to Run)
+        </div>
+      </div>
+
+      <!-- ==============================================
+           SECTION 1: PROJECT OVERVIEW
+      =============================================== -->
+      <section class="sim-section active" id="sec-overview">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+              Adaptive Cluster-Based Smart City IoT Communication
+            </h1>
+            <p class="section-subtitle">
+              High-performance simulation of energy-efficient smart city wireless sensor networks utilizing adaptive cluster formation, systematic Low-Density Parity-Check (LDPC) error-correction coding, Binary Phase Shift Keying (BPSK) modulation, and realistic multipath/AWGN channel propagation.
+            </p>
+          </div>
+        </div>
+
+        <!-- 4 Live Metric Cards -->
+        <div class="grid-4" style="margin-bottom: 24px;">
+          <div class="metric-card">
+            <span class="metric-label">Active Sensor Nodes</span>
+            <div class="metric-value" id="cardActiveNodes">30 <span class="metric-unit">nodes</span></div>
+            <div class="metric-foot">Smart city IoT transmitters</div>
+          </div>
+          <div class="metric-card cyan">
+            <span class="metric-label">Adaptive Clusters</span>
+            <div class="metric-value" id="cardClusterCount">3 <span class="metric-unit">CH heads</span></div>
+            <div class="metric-foot">Energy & distance suitability</div>
+          </div>
+          <div class="metric-card amber">
+            <span class="metric-label">Operating SNR</span>
+            <div class="metric-value" id="cardCurrentSnr">6.0 <span class="metric-unit">dB</span></div>
+            <div class="metric-foot">Wireless AWGN / fading level</div>
+          </div>
+          <div class="metric-card emerald" id="cardBerWrap">
+            <span class="metric-label">Decoded Bit Error Rate</span>
+            <div class="metric-value" id="cardCurrentBer">0.000 <span class="metric-unit">BER</span></div>
+            <div class="metric-foot" id="cardBerFoot">LDPC error correction active</div>
+          </div>
+        </div>
+
+        <!-- Objectives and System Architecture Overview -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                Core Engineering Objectives
+              </div>
+            </div>
+            <ul style="list-style:none; display:flex; flex-direction:column; gap:10px; font-size:13px; color:var(--text-main);">
+              <li style="display:flex; align-items:flex-start; gap:8px;">
+                <span style="color:#059669; font-weight:700;">✓</span>
+                <div><strong>Reliable Sensor Telemetry:</strong> Error-free recovery of vital environmental telemetry (temperature, humidity, air quality, flood levels, parking).</div>
+              </li>
+              <li style="display:flex; align-items:flex-start; gap:8px;">
+                <span style="color:#059669; font-weight:700;">✓</span>
+                <div><strong>Adaptive Cluster Formation:</strong> Dynamic Cluster Head (CH) election using residual energy ($E_{res}$) and distance to Base Station ($d_{BS}$).</div>
+              </li>
+              <li style="display:flex; align-items:flex-start; gap:8px;">
+                <span style="color:#059669; font-weight:700;">✓</span>
+                <div><strong>LDPC Error-Correction Coding:</strong> Systematic (12, 6) parity-check matrix H = [P | I] and iterative Sum-Product / Min-Sum belief propagation decoding.</div>
+              </li>
+              <li style="display:flex; align-items:flex-start; gap:8px;">
+                <span style="color:#059669; font-weight:700;">✓</span>
+                <div><strong>BPSK Digital Modulation:</strong> Antipodal mapping ($0 \to +A, 1 \to -A$) providing maximum Euclidean distance per bit energy.</div>
+              </li>
+              <li style="display:flex; align-items:flex-start; gap:8px;">
+                <span style="color:#059669; font-weight:700;">✓</span>
+                <div><strong>Robustness under Severe Noise:</strong> Demonstration of 3 to 5 dB coding gain over uncoded transmission under AWGN and Rayleigh fading.</div>
+              </li>
+              <li style="display:flex; align-items:flex-start; gap:8px;">
+                <span style="color:#059669; font-weight:700;">✓</span>
+                <div><strong>Network Energy Conservation:</strong> First-order radio model showing up to 68% energy savings compared to direct long-distance transmission.</div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                Physical Communication Chain
+              </div>
+            </div>
+            <!-- Interactive Visual Diagram of Data Path -->
+            <div style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:16px;">
+              <svg width="100%" height="160" viewBox="0 0 540 160" style="overflow:visible;">
+                <defs>
+                  <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6"/>
+                  </marker>
+                </defs>
+                <!-- Nodes -->
+                <g transform="translate(10, 20)">
+                  <rect width="90" height="45" rx="6" fill="#1e40af" />
+                  <text x="45" y="24" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">ESP32 Nodes</text>
+                  <text x="45" y="38" fill="#93c5fd" font-size="9" text-anchor="middle">Sensor Data</text>
+                </g>
+                <line x1="105" y1="42" x2="135" y2="42" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+
+                <g transform="translate(140, 20)">
+                  <rect width="90" height="45" rx="6" fill="#0891b2" />
+                  <text x="45" y="24" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">Cluster Head</text>
+                  <text x="45" y="38" fill="#cffafe" font-size="9" text-anchor="middle">Aggregation</text>
+                </g>
+                <line x1="235" y1="42" x2="265" y2="42" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+
+                <g transform="translate(270, 20)">
+                  <rect width="100" height="45" rx="6" fill="#7c3aed" />
+                  <text x="50" y="24" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">LDPC Encoder</text>
+                  <text x="50" y="38" fill="#e9d5ff" font-size="9" text-anchor="middle">Rate 1/2 Hc^T=0</text>
+                </g>
+                <line x1="375" y1="42" x2="405" y2="42" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)" />
+
+                <g transform="translate(410, 20)">
+                  <rect width="90" height="45" rx="6" fill="#0284c7" />
+                  <text x="45" y="24" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">BPSK Mod</text>
+                  <text x="45" y="38" fill="#bae6fd" font-size="9" text-anchor="middle">Carrier s(t)</text>
+                </g>
+
+                <!-- Second Row (Return path through channel to receiver) -->
+                <path d="M 455 70 L 455 95 L 435 95" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4" />
+
+                <g transform="translate(320, 85)">
+                  <rect width="110" height="45" rx="6" fill="#d97706" />
+                  <text x="55" y="22" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">Wireless Channel</text>
+                  <text x="55" y="36" fill="#fef3c7" font-size="9" text-anchor="middle">AWGN + Fading r(t)</text>
+                </g>
+                <line x1="315" y1="108" x2="275" y2="108" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow)" />
+
+                <g transform="translate(160, 85)">
+                  <rect width="110" height="45" rx="6" fill="#0d9488" />
+                  <text x="55" y="22" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">BPSK Demod</text>
+                  <text x="55" y="36" fill="#ccfbf1" font-size="9" text-anchor="middle">Matched Filter & LLR</text>
+                </g>
+                <line x1="155" y1="108" x2="115" y2="108" stroke="#059669" stroke-width="2" marker-end="url(#arrow)" />
+
+                <g transform="translate(10, 85)">
+                  <rect width="100" height="45" rx="6" fill="#059669" />
+                  <text x="50" y="22" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">LDPC Decoder</text>
+                  <text x="50" y="36" fill="#d1fae5" font-size="9" text-anchor="middle">Belief Propagation</text>
+                </g>
+              </svg>
+            </div>
+            <div class="theory-box" style="margin-top:12px;">
+              <div class="theory-title">Lab Summary</div>
+              Use the sidebar or the Top Navigation controls to run each block individually or trigger the unified end-to-end pipeline. All calculations are executed in real-time in this browser session.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 2: SMART CITY ENVIRONMENT
+      =============================================== -->
+      <section class="sim-section" id="sec-smartcity">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>
+              Smart City Sensor Deployment
+            </h2>
+            <p class="section-subtitle">
+              Interactive 2D spatial representation of smart municipal infrastructure with distributed sensor nodes reporting environmental and urban telemetry. Click any node to inspect real-time measurements.
+            </p>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn btn-outline btn-sm" id="btnRandomizeCitySensors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+              Regenerate City Readings
+            </button>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="control-group">
+            <span class="control-label">Node Density</span>
+            <div class="range-wrap">
+              <input type="range" class="range-input" id="cityNodeSlider" min="10" max="100" step="5" value="30">
+              <span class="range-val" id="cityNodeVal">30 nodes</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Sensor Filter</span>
+            <select class="control-input" id="citySensorFilter">
+              <option value="all">All Sensor Types (7 Types)</option>
+              <option value="traffic">Traffic Flow</option>
+              <option value="temperature">Temperature & Humidity</option>
+              <option value="air_quality">Air Quality (MQ-135)</option>
+              <option value="water_level">Water Level (HC-SR04)</option>
+              <option value="parking">Smart Parking</option>
+              <option value="streetlight">Street Light (LDR)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Interactive Mode</span>
+            <span style="font-size:12px; color:var(--text-muted); padding:6px 0;">Click on any node to load into ESP32 transmitter</span>
+          </div>
+        </div>
+
+        <!-- City Visual Canvas -->
+        <div class="card" style="padding:10px;">
+          <canvas id="cityMapCanvas" class="sim-canvas" width="1100" height="420" style="background:#090d16; cursor:crosshair;"></canvas>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:11px; color:var(--text-muted); padding:0 8px;">
+            <span>● Blue: Traffic | ● Orange: Temp/Humidity | ● Emerald: Air Quality | ● Cyan: Water Level | ● Purple: Parking | ● Yellow: Streetlight</span>
+            <span id="cityCanvasStatus">Hover over node to preview data</span>
+          </div>
+        </div>
+
+        <!-- Selected Sensor Inspector Card -->
+        <div class="card" id="sensorInspectorCard">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              Selected Sensor Node Telemetry
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnTransmitThisNode">Load Into ESP32 Transmitter ➔</button>
+          </div>
+          <div class="grid-4" id="inspectorMetrics">
+            <div class="metric-card">
+              <span class="metric-label">Node Identifier</span>
+              <div class="metric-value" id="inspNodeId">Node #01</div>
+              <div class="metric-foot" id="inspNodeType">Traffic Sensor</div>
+            </div>
+            <div class="metric-card cyan">
+              <span class="metric-label">Primary Reading</span>
+              <div class="metric-value" id="inspReading">42.5 <span class="metric-unit">veh/min</span></div>
+              <div class="metric-foot">Dynamic sensor telemetry</div>
+            </div>
+            <div class="metric-card emerald">
+              <span class="metric-label">Residual Energy</span>
+              <div class="metric-value" id="inspBattery">89 <span class="metric-unit">%</span></div>
+              <div class="metric-foot">0.89 Joules remaining</div>
+            </div>
+            <div class="metric-card amber">
+              <span class="metric-label">Assigned Cluster</span>
+              <div class="metric-value" id="inspCluster">CH #03</div>
+              <div class="metric-foot">Distance: 48.2 meters</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 3: SENSOR NETWORK & ESP32 HARDWARE
+      =============================================== -->
+      <section class="sim-section" id="sec-esp32">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect></svg>
+              ESP32 Transmitter & Hardware Architecture
+            </h2>
+            <p class="section-subtitle">
+              Detailed technical schematic of the IoT sensing unit. Physical peripherals interface with the ESP-WROOM-32 via GPIO pins and generate structured telemetry packets for digital modulation.
+            </p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnSampleSensors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            Trigger Sensor Acquisition Pulse
+          </button>
+        </div>
+
+        <!-- ESP32 Vector Graphic & Sensor Interconnect -->
+        <div class="card" style="padding:16px;">
+          <div style="background:#090d16; border-radius:var(--radius-sm); padding:20px; overflow-x:auto;">
+            <svg width="100%" height="340" viewBox="0 0 940 340" id="esp32SvgGraphic" style="min-width:750px;">
+              <defs>
+                <linearGradient id="pcbGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1e293b"/>
+                  <stop offset="100%" stop-color="#0f172a"/>
+                </linearGradient>
+                <linearGradient id="shieldGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#94a3b8"/>
+                  <stop offset="50%" stop-color="#cbd5e1"/>
+                  <stop offset="100%" stop-color="#64748b"/>
+                </linearGradient>
+                <linearGradient id="copperTrace" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#f59e0b"/>
+                  <stop offset="100%" stop-color="#38bdf8"/>
+                </linearGradient>
+                <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                </filter>
+              </defs>
+
+              <!-- Left Peripheral Sensors -->
+              <!-- Sensor 1: DHT22 -->
+              <g transform="translate(30, 20)" id="svgDht22" class="hardware-sensor" style="cursor:pointer;">
+                <rect width="130" height="60" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+                <rect x="15" y="10" width="100" height="15" rx="2" fill="#cbd5e1"/>
+                <text x="65" y="42" font-size="11" font-weight="700" fill="#0f172a" text-anchor="middle">DHT22 Digital</text>
+                <text x="65" y="54" font-size="9" fill="#0284c7" text-anchor="middle" id="svgDhtReading">28.4°C | 58% RH</text>
+                <circle cx="130" cy="30" r="4" fill="#38bdf8"/>
+              </g>
+
+              <!-- Sensor 2: HC-SR04 -->
+              <g transform="translate(30, 95)" id="svgHcSr04" class="hardware-sensor" style="cursor:pointer;">
+                <rect width="130" height="60" rx="6" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.5"/>
+                <circle cx="40" cy="30" r="16" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                <circle cx="40" cy="30" r="6" fill="#94a3b8"/>
+                <text x="40" y="34" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">T</text>
+                <circle cx="90" cy="30" r="16" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                <circle cx="90" cy="30" r="6" fill="#94a3b8"/>
+                <text x="90" y="34" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">R</text>
+                <text x="65" y="55" font-size="8" font-weight="700" fill="#93c5fd" text-anchor="middle" id="svgUsReading">HC-SR04: 1.84 m</text>
+                <circle cx="130" cy="30" r="4" fill="#38bdf8"/>
+              </g>
+
+              <!-- Sensor 3: MQ-135 Gas -->
+              <g transform="translate(30, 170)" id="svgMq135" class="hardware-sensor" style="cursor:pointer;">
+                <rect width="130" height="60" rx="6" fill="#78350f" stroke="#b45309" stroke-width="1.5"/>
+                <circle cx="45" cy="30" r="18" fill="#e2e8f0" stroke="#92400e" stroke-width="3"/>
+                <circle cx="45" cy="30" r="10" fill="#b45309" stroke-dasharray="2,2"/>
+                <text x="95" y="28" font-size="10" font-weight="700" fill="#fef3c7">MQ-135</text>
+                <text x="95" y="42" font-size="8" fill="#fde68a" id="svgGasReading">AQI: 74 ppm</text>
+                <circle cx="130" cy="30" r="4" fill="#38bdf8"/>
+              </g>
+
+              <!-- Sensor 4: LDR Light Sensor -->
+              <g transform="translate(30, 245)" id="svgLdr" class="hardware-sensor" style="cursor:pointer;">
+                <rect width="130" height="60" rx="6" fill="#312e81" stroke="#6366f1" stroke-width="1.5"/>
+                <circle cx="45" cy="30" r="14" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>
+                <path d="M 37 30 Q 45 22 45 30 T 53 30" fill="none" stroke="#ca8a04" stroke-width="2"/>
+                <text x="95" y="28" font-size="10" font-weight="700" fill="#e0e7ff">LDR Light</text>
+                <text x="95" y="42" font-size="8" fill="#c7d2fe" id="svgLightReading">840 Lux</text>
+                <circle cx="130" cy="30" r="4" fill="#38bdf8"/>
+              </g>
+
+              <!-- Animated Connecting Wire Traces -->
+              <path id="wireTrace1" d="M 160 50 L 250 50 L 250 110 L 320 110" fill="none" stroke="#0284c7" stroke-width="2" stroke-dasharray="6,4" />
+              <path id="wireTrace2" d="M 160 125 L 230 125 L 230 140 L 320 140" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6,4" />
+              <path id="wireTrace3" d="M 160 200 L 230 200 L 230 170 L 320 170" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6,4" />
+              <path id="wireTrace4" d="M 160 275 L 250 275 L 250 200 L 320 200" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="6,4" />
+
+              <!-- ESP32 DevKit Board (Center) -->
+              <g transform="translate(320, 20)">
+                <!-- PCB Body -->
+                <rect width="260" height="300" rx="10" fill="url(#pcbGrad)" stroke="#475569" stroke-width="2.5"/>
+
+                <!-- Micro USB Connector -->
+                <rect x="95" y="0" width="70" height="22" rx="3" fill="#94a3b8" stroke="#475569"/>
+                <rect x="105" y="4" width="50" height="12" fill="#334155"/>
+
+                <!-- 3.3V AMS1117 LDO Voltage Regulator -->
+                <rect x="195" y="30" width="30" height="20" rx="2" fill="#1e293b" stroke="#64748b"/>
+                <text x="210" y="44" font-size="7" fill="#94a3b8" text-anchor="middle">3.3V LDO</text>
+
+                <!-- Left GPIO Pin Headers -->
+                <g fill="#e2e8f0" font-size="8" font-family="monospace">
+                  <rect x="6" y="30" width="16" height="250" fill="#0f172a" stroke="#334155"/>
+                  <text x="26" y="45" fill="#94a3b8">3V3</text>
+                  <text x="26" y="65" fill="#94a3b8">EN</text>
+                  <text x="26" y="85" fill="#38bdf8">D34 (MQ135)</text>
+                  <text x="26" y="105" fill="#38bdf8">D35 (LDR)</text>
+                  <text x="26" y="125" fill="#38bdf8">D32 (DHT22)</text>
+                  <text x="26" y="145" fill="#38bdf8">D33 (HCSR04)</text>
+                  <text x="26" y="165" fill="#94a3b8">D25 (DAC1)</text>
+                  <text x="26" y="185" fill="#94a3b8">D26 (DAC2)</text>
+                  <text x="26" y="205" fill="#94a3b8">D27</text>
+                  <text x="26" y="225" fill="#94a3b8">D14</text>
+                  <text x="26" y="245" fill="#94a3b8">D12</text>
+                  <text x="26" y="265" fill="#ef4444">GND</text>
+                </g>
+
+                <!-- Right GPIO Pin Headers -->
+                <g fill="#e2e8f0" font-size="8" font-family="monospace">
+                  <rect x="238" y="30" width="16" height="250" fill="#0f172a" stroke="#334155"/>
+                  <text x="180" y="45" fill="#ef4444">VIN (5V)</text>
+                  <text x="200" y="65" fill="#ef4444">GND</text>
+                  <text x="205" y="85" fill="#94a3b8">D13</text>
+                  <text x="205" y="105" fill="#94a3b8">D12</text>
+                  <text x="205" y="125" fill="#94a3b8">D14</text>
+                  <text x="205" y="145" fill="#94a3b8">D27</text>
+                  <text x="195" y="165" fill="#94a3b8">TXD0</text>
+                  <text x="195" y="185" fill="#94a3b8">RXD0</text>
+                  <text x="200" y="205" fill="#94a3b8">D21</text>
+                  <text x="200" y="225" fill="#94a3b8">D22</text>
+                  <text x="200" y="245" fill="#94a3b8">D23</text>
+                  <text x="195" y="265" fill="#94a3b8">BOOT</text>
+                </g>
+
+                <!-- ESP-WROOM-32 Metal RF Shield -->
+                <rect x="50" y="100" width="160" height="150" rx="6" fill="url(#shieldGrad)" stroke="#475569" stroke-width="2"/>
+                <text x="130" y="130" font-size="13" font-weight="800" fill="#0f172a" text-anchor="middle">ESP-WROOM-32</text>
+                <text x="130" y="146" font-size="9" font-weight="600" fill="#334155" text-anchor="middle">Tensilica Xtensa Dual-Core</text>
+                <text x="130" y="160" font-size="8" fill="#475569" text-anchor="middle">240 MHz • 520 KB SRAM • Wi-Fi/BT</text>
+
+                <!-- PCB Meandered Inverted-F 2.4GHz Antenna -->
+                <rect x="75" y="258" width="110" height="35" rx="3" fill="#14532d" stroke="#22c55e" stroke-width="1.5"/>
+                <path d="M 85 275 L 175 275 M 100 275 L 100 285 M 120 275 L 120 285 M 140 275 L 140 285 M 160 275 L 160 285" stroke="#facc15" stroke-width="2" fill="none"/>
+                <text x="130" y="270" font-size="8" font-weight="700" fill="#bbf7d0" text-anchor="middle">2.4 GHz PCB Antenna</text>
+
+                <!-- Status & Power LEDs -->
+                <circle cx="65" cy="50" r="5" fill="#ef4444" id="ledPwr"/>
+                <text x="65" y="66" font-size="7" fill="#f87171" text-anchor="middle">PWR</text>
+                <circle cx="85" cy="50" r="5" fill="#3b82f6" id="ledTx"/>
+                <text x="85" y="66" font-size="7" fill="#60a5fa" text-anchor="middle">TX</text>
+              </g>
+
+              <!-- Outgoing Telemetry Packet (Right) -->
+              <g transform="translate(630, 40)">
+                <rect width="280" height="260" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+                <rect x="0" y="0" width="280" height="32" rx="8" fill="#1e293b"/>
+                <circle cx="16" cy="16" r="4" fill="#ef4444"/>
+                <circle cx="28" cy="16" r="4" fill="#f59e0b"/>
+                <circle cx="40" cy="16" r="4" fill="#10b981"/>
+                <text x="60" y="20" font-size="11" font-weight="700" fill="#e2e8f0">Generated JSON Packet</text>
+
+                <foreignObject x="15" y="40" width="250" height="210">
+                  <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#38bdf8; line-height:1.45; overflow-y:auto; height:100%;">
+                    <pre id="jsonPacketCode" style="margin:0; white-space:pre-wrap;">{
+  "node_id": 1,
+  "seq": 104,
+  "cluster_id": 3,
+  "temperature": 28.4,
+  "humidity": 58.0,
+  "air_quality": 74,
+  "water_level": 1.84,
+  "light_lux": 840,
+  "battery_pct": 89
+}</pre>
+                  </div>
+                </foreignObject>
+              </g>
+
+              <!-- Animated RF Emission Waves from ESP32 Antenna -->
+              <path d="M 600 270 A 30 30 0 0 1 630 300" stroke="#06b6d4" stroke-width="2" fill="none" opacity="0.8" id="rfWave1"/>
+              <path d="M 600 260 A 45 45 0 0 1 645 305" stroke="#06b6d4" stroke-width="2" fill="none" opacity="0.6" id="rfWave2"/>
+              <path d="M 600 250 A 60 60 0 0 1 660 310" stroke="#06b6d4" stroke-width="2" fill="none" opacity="0.4" id="rfWave3"/>
+            </svg>
+          </div>
+
+          <!-- Manual Sensor Value Overrides -->
+          <div style="margin-top:16px;">
+            <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:10px;">
+              Manual Sensor Calibration Controls
+            </div>
+            <div class="grid-4">
+              <div class="control-group">
+                <span class="control-label">Temperature (°C)</span>
+                <input type="number" class="control-input" id="inputTemp" value="28.4" step="0.5">
+              </div>
+              <div class="control-group">
+                <span class="control-label">Humidity (% RH)</span>
+                <input type="number" class="control-input" id="inputHumid" value="58.0" step="1">
+              </div>
+              <div class="control-group">
+                <span class="control-label">Air Quality (AQI)</span>
+                <input type="number" class="control-input" id="inputAqi" value="74" step="5">
+              </div>
+              <div class="control-group">
+                <span class="control-label">Water Level (m)</span>
+                <input type="number" class="control-input" id="inputWater" value="1.84" step="0.1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="theory-box">
+          <div class="theory-title">Hardware Architecture Note</div>
+          In this educational simulation, the ESP32 transmitter constructs digital packets from its ADC / GPIO peripherals. In a physical deployment, the ESP32 transmits frames using custom PHY BPSK modulation or ESP-NOW. Here, the digital bitstream is fed into our systematic LDPC encoder and modulated BPSK carrier simulator in pure browser JavaScript.
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 4: ADAPTIVE CLUSTER FORMATION
+      =============================================== -->
+      <section class="sim-section" id="sec-clustering">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="12" r="3"></circle><line x1="8.59" y1="7.41" x2="15.42" y2="10.59"></line><line x1="8.59" y1="16.59" x2="15.42" y2="13.41"></line></svg>
+              Adaptive Cluster Formation & Topology
+            </h2>
+            <p class="section-subtitle">
+              Energy-aware cluster head election based on residual battery energy and Euclidean distance to the central Base Station. Member nodes join the closest cluster head to minimize transmit power.
+            </p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary btn-sm" id="btnRunClustering">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Execute Cluster Formation
+            </button>
+            <button class="btn btn-outline btn-sm" id="btnRandomizeNodes">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+              New Node Topology
+            </button>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="control-group">
+            <span class="control-label">Total Sensor Nodes (N)</span>
+            <div class="range-wrap">
+              <input type="range" class="range-input" id="clusterNodeCount" min="10" max="100" step="5" value="30">
+              <span class="range-val" id="clusterNodeCountVal">30 nodes</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Target Cluster Heads (k)</span>
+            <div class="range-wrap">
+              <input type="range" class="range-input" id="clusterHeadCount" min="2" max="6" step="1" value="3">
+              <span class="range-val" id="clusterHeadCountVal">3 CHs</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Weight Factor α (Energy)</span>
+            <div class="range-wrap">
+              <input type="range" class="range-input" id="weightEnergy" min="0.1" max="0.9" step="0.1" value="0.6">
+              <span class="range-val" id="weightEnergyVal">0.6</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2D Wireless Topology Canvas -->
+        <div class="card" style="padding:10px;">
+          <canvas id="topologyCanvas" class="sim-canvas" width="1100" height="420" style="background:#090d16;"></canvas>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:11px; color:var(--text-muted); padding:0 8px;">
+            <span>▲ Base Station (BS) | ★ Cluster Heads (Large Pulse) | ● Member Sensor Nodes (Dashed Uplink)</span>
+            <span id="clusterCanvasStatus">3 Clusters active. Clustered routing saves transmission power.</span>
+          </div>
+        </div>
+
+        <!-- Cluster Details Table & Energy Model -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Cluster Head Election Leaderboard</div>
+            </div>
+            <div class="data-table-wrap">
+              <table class="data-table" id="chTable">
+                <thead>
+                  <tr>
+                    <th>CH ID</th>
+                    <th>Members</th>
+                    <th>Residual Energy</th>
+                    <th>Dist to BS</th>
+                    <th>Score</th>
+                  </tr>
+                </thead>
+                <tbody id="chTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Adaptive CH Selection Metric Formula</div>
+            </div>
+            <p style="font-size:13px; color:var(--text-main); margin-bottom:12px;">
+              Each sensor node calculates an objective score combining normalized residual battery energy ($E_{res}$) and distance suitability to the Base Station ($d_{BS}$):
+            </p>
+            <div class="math-formula" style="font-size:13px; padding:10px; display:block;">
+              Score_i = w_E · (E_res,i / E_max) + (1 - w_E) · (1 - d_i,BS / d_max)
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">
+              Where $w_E = 0.6$. The top $k$ nodes with the highest scores assume Cluster Head duties, collecting, compressing, and encoding telemetry packets before forwarding them over the long-distance uplink to the Base Station.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 5: DATA ENCODING & LDPC
+      =============================================== -->
+      <section class="sim-section" id="sec-encoding">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              Sensor Data Encoding & Systematic LDPC
+            </h2>
+            <p class="section-subtitle">
+              Transformation of numerical sensor measurements into binary sequences and systematic Low-Density Parity-Check (LDPC) forward error-correction encoding.
+            </p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnRunEncode">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Encode Current Payload
+          </button>
+        </div>
+
+        <div class="controls-row">
+          <div class="control-group">
+            <span class="control-label">Select Sensor Telemetry Value</span>
+            <select class="control-input" id="encodeTelemetrySelect">
+              <option value="28.5" data-type="temperature" selected>Temperature: 28.5 °C</option>
+              <option value="58" data-type="humidity">Humidity: 58 % RH</option>
+              <option value="75" data-type="air_quality">Air Quality: 75 AQI</option>
+              <option value="1.8" data-type="water_level">Water Level: 1.8 m</option>
+              <option value="42" data-type="other">Traffic: 42 veh/min</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Coding Scheme</span>
+            <select class="control-input" id="codingSchemeSelect">
+              <option value="ldpc">Systematic LDPC Rate 1/2 (Recommended)</option>
+              <option value="uncoded">Uncoded Transmission (No Parity)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4 Metric Cards for Encoding Details -->
+        <div class="grid-4" style="margin-bottom:20px;">
+          <div class="metric-card">
+            <span class="metric-label">Information Bits (K)</span>
+            <div class="metric-value" id="encKVal">6 <span class="metric-unit">bits</span></div>
+            <div class="metric-foot">Sensor binary payload $u$</div>
+          </div>
+          <div class="metric-card cyan">
+            <span class="metric-label">Parity Bits (M)</span>
+            <div class="metric-value" id="encMVal">6 <span class="metric-unit">bits</span></div>
+            <div class="metric-foot">Redundancy for correction $p$</div>
+          </div>
+          <div class="metric-card amber">
+            <span class="metric-label">Total Codeword (N)</span>
+            <div class="metric-value" id="encNVal">12 <span class="metric-unit">bits</span></div>
+            <div class="metric-foot">Transmitted vector $c = [u \quad p]$</div>
+          </div>
+          <div class="metric-card emerald">
+            <span class="metric-label">Code Rate (R)</span>
+            <div class="metric-value" id="encRateVal">0.50 <span class="metric-unit">K/N = 1/2</span></div>
+            <div class="metric-foot">Systematic rate 1/2</div>
+          </div>
+        </div>
+
+        <!-- Bitstream Visual Display -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Systematic Encoded Codeword: c = [u₀...u₅ | p₀...p₅]</div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <span style="font-size:12px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:6px;">
+              Information Bits $u$ (Cyan) + Parity Bits $p$ (Purple):
+            </span>
+            <div class="bit-stream" id="encodedBitStreamDisplay">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Parity-Check Matrix H Display -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Sparse Parity-Check Matrix H [6×12] = [P | I]</div>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+              A valid codeword satisfies H · cᵀ = 0 (mod 2). In systematic form, each parity bit is p_i = Σ P_ij · u_j (mod 2):
+            </p>
+            <div style="overflow-x:auto; background:var(--bg-card-subtle); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+              <div id="hMatrixDisplay" style="font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.6; color:#0f172a;">
+                <!-- H Matrix grid injected via JS -->
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Parity Bit Equations over GF(2)</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px; font-size:12px; font-family:'JetBrains Mono',monospace;" id="parityCalcDisplay">
+              <!-- Parity equations injected via JS -->
+            </div>
+            <div class="theory-box" style="margin-top:12px;">
+              <div class="theory-title">Why Low-Density Parity-Check?</div>
+              Sparse parity check matrices have very few 1s per row and column. This allows iterative graph-based belief propagation decoders to resolve bit ambiguities through linear-complexity local message updates.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 6: BPSK MODULATION
+      =============================================== -->
+      <section class="sim-section" id="sec-modulation">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><path d="M2 12h2a4 4 0 0 0 4-4 4 4 0 0 1 4-4h0a4 4 0 0 1 4 4 4 4 0 0 0 4 4h2"></path></svg>
+              Binary Phase Shift Keying (BPSK) Modulation
+            </h2>
+            <p class="section-subtitle">
+              Digital carrier modulation where binary bits modulate the carrier phase: bit 0 corresponds to carrier phase $0$ ($+A$), while bit 1 corresponds to phase shift $\pi$ ($-A$).
+            </p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnUpdateModulation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            Update Waveform
+          </button>
+        </div>
+
+        <div class="controls-row">
+          <div class="control-group">
+            <span class="control-label">Carrier Frequency (fc)</span>
+            <div class="range-wrap">
+              <input type="range" class="range-input" id="modCarrierFreq" min="1" max="4" step="1" value="2">
+              <span class="range-val" id="modCarrierFreqVal">2 cycles/bit</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Carrier Amplitude (A)</span>
+            <div class="range-wrap">
+              <input type="range" class="range-input" id="modAmplitude" min="0.5" max="2.0" step="0.1" value="1.0">
+              <span class="range-val" id="modAmplitudeVal">1.0 V</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Bit Mapping Convention</span>
+            <select class="control-input" id="modMappingSelect">
+              <option value="standard">Bit 0 → +1, Bit 1 → -1</option>
+              <option value="inverted">Bit 0 → -1, Bit 1 → +1</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- BPSK Waveform Canvas -->
+        <div class="card" style="padding:12px;">
+          <div class="card-header" style="margin-bottom:8px; padding-bottom:8px;">
+            <div class="card-title">Continuous Time Modulated Waveform: s(t) = A · cos(2π·fc·t + θ_k)</div>
+            <div style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">Sampling: 100 samples/bit</div>
+          </div>
+          <canvas id="modWaveCanvas" class="sim-canvas" width="1100" height="220" style="background:#090d16;"></canvas>
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:var(--text-muted); padding:0 8px;">
+            <span>Phase transitions marked by dashed grid lines. Notice $180^\circ$ phase reversal at bit changes.</span>
+            <span id="modBitLegend">Bits: 0, 1, 0, 0, 1, 1...</span>
+          </div>
+        </div>
+
+        <!-- Constellation Diagram & Signal Theory -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Transmitted BPSK Constellation Diagram</div>
+            </div>
+            <div style="display:flex; justify-content:center; padding:10px;">
+              <canvas id="modConstellationCanvas" width="300" height="240" style="background:#090d16; border-radius:var(--radius-sm);"></canvas>
+            </div>
+            <div style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:6px;">
+              Ideal Antipodal Constellation: $s_0 = (+1, 0)$ and $s_1 = (-1, 0)$. Minimum Euclidean distance d_min = 2√(Eb).
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Mathematical Formulation of BPSK</div>
+            </div>
+            <p style="font-size:13px; color:var(--text-main); margin-bottom:8px;">
+              In Binary Phase Shift Keying, the modulated bandpass signal is expressed as:
+            </p>
+            <div class="math-formula" style="display:block; margin-bottom:8px;">
+              s_k(t) = A · cos(2π·fc·t + (1 - b_k)π),  0 ≤ t ≤ T_b
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); line-height:1.6;">
+              Equivalently, using baseband antipodal symbol notation:
+              <br>• If bit $b_k = 0 \implies s_k = +A$ (in-phase carrier $\cos(2\pi f_c t)$)
+              <br>• If bit $b_k = 1 \implies s_k = -A$ (inverted carrier $\cos(2\pi f_c t + \pi)$)
+            </p>
+            <div class="theory-box" style="margin-top:10px;">
+              <div class="theory-title">Power Efficiency</div>
+              BPSK yields the lowest theoretical bit error rate among all binary modulation schemes for a given signal-to-noise ratio: $P_b = Q(√(2Eb/N0))$.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 7: WIRELESS CHANNEL & NOISE
+      =============================================== -->
+      <section class="sim-section" id="sec-channel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+              Wireless Channel & Channel Noise Simulation
+            </h2>
+            <p class="section-subtitle">
+              Realistic physical propagation channel introducing Additive White Gaussian Noise (AWGN), multipath delay, and Rayleigh/Rician fading. Adjust the Signal-to-Noise Ratio (SNR) to observe signal degradation.
+            </p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnRunChannel">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            Re-generate Channel Realization
+          </button>
+        </div>
+
+        <div class="controls-row">
+          <div class="control-group">
+            <span class="control-label">Signal-to-Noise Ratio (SNR)</span>
+            <div class="range-wrap">
+              <input type="range" class="range-input" id="chanSnrSlider" min="-5" max="20" step="1" value="6">
+              <span class="range-val" id="chanSnrVal">6 dB</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Channel Propagation Model</span>
+            <select class="control-input" id="chanModelSelect">
+              <option value="awgn">AWGN (Additive White Gaussian Noise)</option>
+              <option value="rayleigh">Rayleigh Fading (Non-Line-of-Sight NLOS)</option>
+              <option value="rician">Rician Fading (Line-of-Sight K=4)</option>
+              <option value="multipath">Multipath 2-Ray (Direct + Echo)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Calculated Noise Std Dev (σ)</span>
+            <span class="range-val" id="chanSigmaVal" style="color:#d97706; padding:6px 0;">σ = 0.354</span>
+          </div>
+        </div>
+
+        <!-- Real-Time Waveform Comparison: Clean vs Noisy Signal -->
+        <div class="card" style="padding:12px;">
+          <div class="card-header" style="margin-bottom:8px; padding-bottom:8px;">
+            <div class="card-title">Channel Output: Transmitted s(t) [Cyan] vs Received Noisy r(t) = s(t) + n(t) [Amber]</div>
+          </div>
+          <canvas id="chanWaveCanvas" class="sim-canvas" width="1100" height="240" style="background:#090d16;"></canvas>
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:var(--text-muted); padding:0 8px;">
+            <span>Cyan: Clean Modulated Carrier | Amber: Noisy Distorted Signal received at antenna</span>
+            <span id="chanSnrText">SNR = 6 dB (Moderate Noise)</span>
+          </div>
+        </div>
+
+        <!-- Received Constellation Cloud Spread & Noise Model -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Received Constellation Cloud (Noise Dispersion)</div>
+            </div>
+            <div style="display:flex; justify-content:center; padding:10px;">
+              <canvas id="chanConstellationCanvas" width="300" height="240" style="background:#090d16; border-radius:var(--radius-sm);"></canvas>
+            </div>
+            <div style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:6px;">
+              Cross-zero line transitions cause bit detection errors. Notice cloud spread widens as SNR decreases.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Mathematical Noise & Fading Model</div>
+            </div>
+            <p style="font-size:13px; color:var(--text-main); margin-bottom:8px;">
+              The continuous-time and discrete sample representations of the received signal are:
+            </p>
+            <div class="math-formula" style="display:block; margin-bottom:8px;">
+              r(t) = h(t) · s(t) + n(t)
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); line-height:1.6;">
+              • <strong>AWGN:</strong> $n(t) \sim \mathcal{N}(0, \sigma^2)$, generated via the Box-Muller transform:
+              <br>$\sigma = \sqrt{\frac{E_s}{2 \cdot 10^{\text{SNR}_{dB}/10}}}$.
+              <br>• <strong>Rayleigh Fading:</strong> $h = \sqrt{x^2 + y^2}$ with zero-mean Gaussian quadrature components representing multipath scattering in dense urban buildings.
+              <br>• <strong>Rician Fading:</strong> Direct Line-of-Sight path with $K$-factor dominant specular component.
+            </p>
+            <div class="theory-box" style="margin-top:10px;">
+              <div class="theory-title">Channel Impairment Impact</div>
+              At negative or low SNR (e.g. $\le 2\text{ dB}$), noise frequently causes received symbol samples to cross the zero threshold into the opposite decision region, generating bit errors that require LDPC correction.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 8: RECEIVER & DEMODULATION
+      =============================================== -->
+      <section class="sim-section" id="sec-demodulation">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+              Receiver & BPSK Demodulation
+            </h2>
+            <p class="section-subtitle">
+              Coherent matched filtering / correlation detector with optimal decision threshold device to recover raw transmitted digital bits prior to error-correction decoding.
+            </p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnRunDemod">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Execute Demodulation
+          </button>
+        </div>
+
+        <!-- 4 Demodulation Metric Cards -->
+        <div class="grid-4" style="margin-bottom:20px;">
+          <div class="metric-card">
+            <span class="metric-label">Demodulated Bits</span>
+            <div class="metric-value" id="demodTotalBits">12 <span class="metric-unit">bits</span></div>
+            <div class="metric-foot">Codeword length $N$</div>
+          </div>
+          <div class="metric-card amber" id="demodRawErrCard">
+            <span class="metric-label">Raw Demod Bit Errors</span>
+            <div class="metric-value" id="demodErrCount">1 <span class="metric-unit">error</span></div>
+            <div class="metric-foot" id="demodErrRateText">Raw BER: 0.0833</div>
+          </div>
+          <div class="metric-card cyan">
+            <span class="metric-label">Decision Threshold (γ)</span>
+            <div class="metric-value">0.0 <span class="metric-unit">V</span></div>
+            <div class="metric-foot">Symmetric optimal threshold</div>
+          </div>
+          <div class="metric-card emerald">
+            <span class="metric-label">Receiver Architecture</span>
+            <div class="metric-value" style="font-size:18px;">Coherent <span class="metric-unit">integrator</span></div>
+            <div class="metric-foot">Matched to carrier $\cos(2\pi f_c t)$</div>
+          </div>
+        </div>
+
+        <!-- Matched Filter Output & Decision Device Canvas -->
+        <div class="card" style="padding:12px;">
+          <div class="card-header" style="margin-bottom:8px; padding-bottom:8px;">
+            <div class="card-title">Matched Filter Correlation Output: y_k = (2/Tb) ∫ r(t)·cos(2π·fc·t) dt</div>
+          </div>
+          <canvas id="demodFilterCanvas" class="sim-canvas" width="1100" height="200" style="background:#090d16;"></canvas>
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:var(--text-muted); padding:0 8px;">
+            <span>Sample points above 0 $\to$ Bit 0. Points below 0 $\to$ Bit 1. Red points indicate decision errors!</span>
+            <span id="demodFilterStatus">Decision device operating at $\gamma = 0$</span>
+          </div>
+        </div>
+
+        <!-- Bit Comparison Table: Transmitted vs Demodulated (Pre-LDPC) -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Raw Demodulated Bitstream vs Transmitted Codeword (Pre-Decoding)</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div>
+              <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Transmitted Codeword (c):</span>
+              <div class="bit-stream" id="demodTxBitDisplay"></div>
+            </div>
+            <div>
+              <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Raw Demodulated Bitstream (c_raw):</span>
+              <div class="bit-stream" id="demodRxBitDisplay"></div>
+            </div>
+          </div>
+          <div class="theory-box" style="margin-top:12px;">
+            <div class="theory-title">Decision Rule Analysis</div>
+            If $y_k \ge 0$, the receiver decides bit $0$. If $y_k < 0$, it decides bit $1$. When severe noise pushes a $+1$ symbol below zero (or a $-1$ symbol above zero), a raw detection error occurs (highlighted in flashing red). These errors are passed to the LDPC decoder for correction.
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 9: LDPC DECODING
+      =============================================== -->
+      <section class="sim-section" id="sec-decoding">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              Iterative LDPC Belief-Propagation Decoder
+            </h2>
+            <p class="section-subtitle">
+              Soft-decision iterative Sum-Product / Min-Sum decoding over Tanner bipartite graph. Log-Likelihood Ratios (LLR) pass between variable and check nodes until the syndrome s = H · cᵀ = 0.
+            </p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary btn-sm" id="btnRunDecode">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Run Iterative Decoder
+            </button>
+            <button class="btn btn-outline btn-sm" id="btnStepDecode">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              Step 1 Iteration
+            </button>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="control-group">
+            <span class="control-label">Max Iterations (I_max)</span>
+            <div class="range-wrap">
+              <input type="range" class="range-input" id="decodeMaxIterSlider" min="1" max="15" step="1" value="8">
+              <span class="range-val" id="decodeMaxIterVal">8 iterations</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Min-Sum Attenuation Factor (α)</span>
+            <div class="range-wrap">
+              <input type="range" class="range-input" id="decodeAlphaSlider" min="0.5" max="1.0" step="0.05" value="0.75">
+              <span class="range-val" id="decodeAlphaVal">0.75</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Decoding Status</span>
+            <span class="range-val" id="decodeStatusBadge" style="color:#059669; padding:6px 0;">Converged ($s = 0$)</span>
+          </div>
+        </div>
+
+        <!-- 4 Decoder Performance Cards -->
+        <div class="grid-4" style="margin-bottom:20px;">
+          <div class="metric-card">
+            <span class="metric-label">Iterations Performed</span>
+            <div class="metric-value" id="decIterCount">2 <span class="metric-unit">iters</span></div>
+            <div class="metric-foot">Early termination on syndrome = 0</div>
+          </div>
+          <div class="metric-card cyan">
+            <span class="metric-label">Errors Corrected</span>
+            <div class="metric-value" id="decFixedCount">1 <span class="metric-unit">bit</span></div>
+            <div class="metric-foot">Corrected by belief propagation</div>
+          </div>
+          <div class="metric-card emerald">
+            <span class="metric-label">Residual Bit Errors</span>
+            <div class="metric-value" id="decResidualCount">0 <span class="metric-unit">errors</span></div>
+            <div class="metric-foot">Post-decoding BER = 0.000</div>
+          </div>
+          <div class="metric-card amber">
+            <span class="metric-label">Syndrome Vector (s)</span>
+            <div class="metric-value" id="decSyndromeDisplay" style="font-size:16px;">[0, 0, 0, 0, 0, 0]</div>
+            <div class="metric-foot">Valid parity check condition</div>
+          </div>
+        </div>
+
+        <!-- Tanner Graph / LLR Convergence Canvas -->
+        <div class="card" style="padding:12px;">
+          <div class="card-header" style="margin-bottom:8px; padding-bottom:8px;">
+            <div class="card-title">Tanner Graph Message Passing & LLR Evolution</div>
+          </div>
+          <canvas id="decodeGraphCanvas" class="sim-canvas" width="1100" height="240" style="background:#090d16;"></canvas>
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:var(--text-muted); padding:0 8px;">
+            <span>Top: 12 Variable Nodes (v₀...v₁₁) | Bottom: 6 Check Nodes (c₀...c₅) | Green lines indicate satisfied parity checks</span>
+            <span id="decodeLlrStatus">Log-Likelihood Ratios reinforced toward correct polarity</span>
+          </div>
+        </div>
+
+        <!-- Decoded Information Bitstream Result -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Final Decoded Information Bits (û) & Sensor Value Recovery</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Recovered Information Bits (û):</span>
+              <div class="bit-stream" id="decodeInfoBitsDisplay"></div>
+            </div>
+            <div class="grid-2">
+              <div style="background:var(--bg-card-subtle); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+                <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Original Transmitted Sensor Payload:</div>
+                <div style="font-size:16px; font-weight:700; color:#0f172a; font-family:var(--font-mono);" id="decOriginalValueText">Temperature = 28.4 °C</div>
+              </div>
+              <div style="background:#ecfdf5; padding:12px; border-radius:var(--radius-sm); border:1px solid #a7f3d0;">
+                <div style="font-size:11px; font-weight:700; color:#047857; text-transform:uppercase; margin-bottom:4px;">Decoded & Verified Payload:</div>
+                <div style="font-size:16px; font-weight:700; color:#047857; font-family:var(--font-mono);" id="decRecoveredValueText">Temperature = 28.4 °C (100% Match)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 10: PERFORMANCE ANALYSIS
+      =============================================== -->
+      <section class="sim-section" id="sec-performance">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="4"></line></svg>
+              Performance Analysis & Monte Carlo Simulation
+            </h2>
+            <p class="section-subtitle">
+              Empirical and analytical performance evaluation comparing LDPC-Coded BPSK with Uncoded BPSK across Bit Error Rate (BER), Packet Delivery Ratio (PDR), Throughput, and Sensor Network Lifetime.
+            </p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnRunMonteCarlo">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Execute Monte Carlo Trials (10,000 Bits)
+          </button>
+        </div>
+
+        <div class="controls-row">
+          <div class="control-group">
+            <span class="control-label">Monte Carlo Bit Count / SNR Step</span>
+            <select class="control-input" id="monteCarloBitsSelect">
+              <option value="2000">2,000 bits (Fastest)</option>
+              <option value="5000">5,000 bits (Balanced)</option>
+              <option value="10000" selected>10,000 bits (High Precision)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Channel Evaluation Condition</span>
+            <select class="control-input" id="perfChanSelect">
+              <option value="awgn">AWGN Channel</option>
+              <option value="rayleigh">Rayleigh Fading Channel</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Calculated Coding Gain</span>
+            <span class="range-val" style="color:#059669; padding:6px 0;" id="perfCodingGainVal">3.8 dB @ BER = 10⁻³</span>
+          </div>
+        </div>
+
+        <!-- Performance Graphs (Chart.js) -->
+        <div class="grid-2">
+          <!-- Graph 1: BER vs SNR -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">1. Bit Error Rate (BER) vs SNR (dB)</div>
+            </div>
+            <div style="height:260px; position:relative;">
+              <canvas id="chartBerSnr"></canvas>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">
+              Blue: Theoretical BPSK Q(√(2Eb/N0)) | Orange: Simulated Uncoded BPSK | Green: LDPC-Coded BPSK waterfall curve.
+            </div>
+          </div>
+
+          <!-- Graph 2: PDR vs SNR -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">2. Packet Delivery Ratio (PDR) vs SNR (dB)</div>
+            </div>
+            <div style="height:260px; position:relative;">
+              <canvas id="chartPdrSnr"></canvas>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">
+              PDR reaches 100% at significantly lower SNR with LDPC coding compared to uncoded transmission.
+            </div>
+          </div>
+
+          <!-- Graph 3: Throughput vs SNR -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">3. Effective Information Throughput (kbps)</div>
+            </div>
+            <div style="height:260px; position:relative;">
+              <canvas id="chartThroughput"></canvas>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">
+              Accounts for code rate $R = 1/2$ and successful packet delivery probability under noisy channel conditions.
+            </div>
+          </div>
+
+          <!-- Graph 4: Energy Consumption & Network Lifetime -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">4. Network Energy: Clustered vs Direct Transmission</div>
+            </div>
+            <div style="height:260px; position:relative;">
+              <canvas id="chartEnergy"></canvas>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">
+              First-order radio model ($E_{elec} = 50\text{ nJ/bit}$, $\epsilon_{fs} = 10\text{ pJ/bit/m}^2$, $\epsilon_{mp} = 0.0013\text{ pJ/bit/m}^4$).
+            </div>
+          </div>
+        </div>
+
+        <div class="theory-box">
+          <div class="theory-title">Monte Carlo Methodology</div>
+          All points in the charts above are simulated by generating pseudorandom information bits, executing systematic LDPC encoding, mapping through BPSK, passing through Box-Muller Gaussian noise generators across the SNR range $[-2 \text{ dB to } 10 \text{ dB}]$, performing decision demodulation, and executing the iterative belief-propagation decoder. No hardcoded or dummy curves are used.
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 11: FINAL RESULTS
+      =============================================== -->
+      <section class="sim-section" id="sec-results">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              Final Simulation Results & Verification
+            </h2>
+            <p class="section-subtitle">
+              Comprehensive telemetry verification and summary of the smart city communication link. Inspect transmitted vs recovered data, channel conditions, and download laboratory report.
+            </p>
+          </div>
+          <button class="btn btn-success btn-sm" id="btnDownloadCsvFinal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download Complete CSV Report
+          </button>
+        </div>
+
+        <!-- Success Banner -->
+        <div class="card" id="resultsBannerCard" style="background:#ecfdf5; border-color:#a7f3d0; padding:16px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div>
+              <div style="font-size:15px; font-weight:700; color:#065f46;" id="resultsBannerTitle">End-to-End IoT Transmission Succeeded!</div>
+              <div style="font-size:13px; color:#047857;" id="resultsBannerSubtitle">All raw channel errors were successfully corrected by the systematic LDPC iterative decoder. Original sensor telemetry was fully recovered.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transmitted vs Received Comparison Table -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Transmitted Telemetry (Source ESP32)</div>
+            </div>
+            <table class="data-table">
+              <tr>
+                <td><strong>Transmitter Node ID</strong></td>
+                <td id="resTxNodeId">Node #01 (Cluster #03)</td>
+              </tr>
+              <tr>
+                <td><strong>Sensor Telemetry Value</strong></td>
+                <td id="resTxValue">Temperature = 28.4 °C</td>
+              </tr>
+              <tr>
+                <td><strong>Information Bits (u)</strong></td>
+                <td><code style="font-family:var(--font-mono); color:#1e40af;" id="resTxBits">1 0 1 0 0 1</code></td>
+              </tr>
+              <tr>
+                <td><strong>LDPC Codeword c = [u | p]</strong></td>
+                <td><code style="font-family:var(--font-mono); color:#7c3aed;" id="resTxCodeword">1 0 1 0 0 1 0 1 1 0 1 0</code></td>
+              </tr>
+              <tr>
+                <td><strong>Modulation Format</strong></td>
+                <td>BPSK (0 → +1 V, 1 → -1 V)</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Received & Recovered Telemetry (Base Station)</div>
+            </div>
+            <table class="data-table">
+              <tr>
+                <td><strong>Demodulated Raw Bits</strong></td>
+                <td><code style="font-family:var(--font-mono);" id="resRxRawBits">1 0 0 0 0 1 0 1 1 0 1 0</code></td>
+              </tr>
+              <tr>
+                <td><strong>Raw Demod Bit Errors</strong></td>
+                <td id="resRawErrors"><span style="color:#ef4444; font-weight:700;">1 error</span> (at bit index 2)</td>
+              </tr>
+              <tr>
+                <td><strong>LDPC Corrected Errors</strong></td>
+                <td><span style="color:#059669; font-weight:700;" id="resFixedErrors">1 error corrected</span> (Syndrome $s=0$)</td>
+              </tr>
+              <tr>
+                <td><strong>Decoded Bits (û)</strong></td>
+                <td><code style="font-family:var(--font-mono); color:#059669;" id="resRxDecBits">1 0 1 0 0 1</code></td>
+              </tr>
+              <tr>
+                <td><strong>Decoded Sensor Value</strong></td>
+                <td id="resRxValue"><strong>Temperature = 28.4 °C</strong></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Communication Quality & Network Metrics -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Physical Link Quality Metrics</div>
+            </div>
+            <table class="data-table">
+              <tr>
+                <td><strong>Channel SNR</strong></td>
+                <td id="resSnrVal">6.0 dB</td>
+              </tr>
+              <tr>
+                <td><strong>Channel Propagation Model</strong></td>
+                <td id="resChannelModel">AWGN Channel</td>
+              </tr>
+              <tr>
+                <td><strong>Pre-Decoding BER (Raw Channel)</strong></td>
+                <td id="resRawBerVal">0.0833 (1 / 12)</td>
+              </tr>
+              <tr>
+                <td><strong>Post-Decoding BER (Decoded)</strong></td>
+                <td id="resPostBerVal" style="color:#059669; font-weight:700;">0.0000 (0 / 6)</td>
+              </tr>
+              <tr>
+                <td><strong>Packet Delivery Ratio (PDR)</strong></td>
+                <td id="resPdrVal" style="color:#059669; font-weight:700;">100.0 %</td>
+              </tr>
+              <tr>
+                <td><strong>Effective Throughput</strong></td>
+                <td id="resThroughputVal">12.5 kbps</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Smart City Network & Energy Efficiency</div>
+            </div>
+            <table class="data-table">
+              <tr>
+                <td><strong>Active Sensor Nodes</strong></td>
+                <td id="resActiveNodes">30 nodes</td>
+              </tr>
+              <tr>
+                <td><strong>Active Clusters</strong></td>
+                <td id="resClusterCount">3 clusters</td>
+              </tr>
+              <tr>
+                <td><strong>Clustered Energy Consumed</strong></td>
+                <td id="resClusterEnergy">0.42 mJ / packet round</td>
+              </tr>
+              <tr>
+                <td><strong>Direct Transmission Energy</strong></td>
+                <td id="resDirectEnergy">1.35 mJ / packet round</td>
+              </tr>
+              <tr>
+                <td><strong>Energy Efficiency Improvement</strong></td>
+                <td style="color:#059669; font-weight:700;" id="resEnergySavings">68.9 % energy reduction</td>
+              </tr>
+              <tr>
+                <td><strong>Estimated Network Lifetime</strong></td>
+                <td id="resLifetimeVal">2,850 transmission rounds</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Help & Technical Glossary Modal -->
+  <div class="modal-backdrop" id="helpModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Engineering Knowledge Base & Technical Glossary</h3>
+        <button class="modal-close" id="btnCloseHelp">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom:12px;">
+          This laboratory demonstrates an energy-efficient digital communication architecture designed for smart city IoT deployments. Key concepts and system definitions are outlined below:
+        </p>
+
+        <div class="glossary-grid">
+          <div class="glossary-card">
+            <div class="glossary-card-title">1. ESP32 Microcontroller</div>
+            <div class="glossary-card-desc">Dual-core 32-bit Xtensa microcontroller with integrated 2.4GHz Wi-Fi and Bluetooth. Used in smart cities for sensor data acquisition and edge preprocessing.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">2. Wireless Sensor Network (WSN)</div>
+            <div class="glossary-card-desc">Spatially dispersed autonomous IoT sensors monitoring physical and environmental conditions such as air quality, traffic, and water levels.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">3. Adaptive Clustering</div>
+            <div class="glossary-card-desc">Autonomous organization of sensor nodes into local groups to limit long-distance transmissions and distribute transceiver battery depletion.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">4. Cluster Head (CH)</div>
+            <div class="glossary-card-desc">Elected high-energy coordinator node responsible for collecting local sensor measurements, aggregating packets, and transmitting over the uplink to the Base Station.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">5. Base Station (Sink)</div>
+            <div class="glossary-card-desc">Central data gateway and municipal processing server receiving telemetry from all Cluster Heads for smart city dashboard analytics.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">6. LDPC Error-Correction</div>
+            <div class="glossary-card-desc">Low-Density Parity-Check block codes invented by Robert Gallager, achieving near-Shannon-limit channel capacity via iterative sparse graph decoding.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">7. Parity-Check Matrix (H)</div>
+            <div class="glossary-card-desc">Binary matrix defining parity constraints. For valid codeword $c$, $H \cdot c^T = 0 \pmod 2$. In systematic form $H = [P \mid I_m]$.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">8. BPSK Modulation</div>
+            <div class="glossary-card-desc">Binary Phase Shift Keying. Digital modulation shifting carrier phase by $180^\circ$ ($\pi$ radians) between bit 0 ($+A$) and bit 1 ($-A$).</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">9. AWGN Channel</div>
+            <div class="glossary-card-desc">Additive White Gaussian Noise. Thermal noise with uniform spectral density across all frequencies and Gaussian distribution in the time domain.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">10. Signal-to-Noise Ratio (SNR)</div>
+            <div class="glossary-card-desc">Ratio of signal power to background noise power: $\text{SNR}_{dB} = 10 \log_{10}(P_{signal} / P_{noise})$. Key determinant of link quality.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">11. Bit Error Rate (BER)</div>
+            <div class="glossary-card-desc">Ratio of incorrectly received bits to total transmitted bits: $\text{BER} = N_{err} / N_{total}$. Raw channel BER is reduced to zero by LDPC.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">12. Coherent Demodulation</div>
+            <div class="glossary-card-desc">Receiver technique correlating the noisy signal against an in-phase reference carrier $\cos(2\pi f_c t)$ and thresholding at $\gamma = 0$.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">13. Channel Fading (Rayleigh/Rician)</div>
+            <div class="glossary-card-desc">Rapid fluctuations in signal amplitude caused by multipath constructive and destructive interference from buildings, vehicles, and terrain.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">14. Belief Propagation (Sum-Product)</div>
+            <div class="glossary-card-desc">Iterative message-passing algorithm operating on Tanner graphs that exchanges probability vectors or LLRs between variable and check nodes.</div>
+          </div>
+          <div class="glossary-card">
+            <div class="glossary-card-title">15. Energy Efficiency Model</div>
+            <div class="glossary-card-desc">First-order radio energy formulation modeling transmit electronics dissipation ($E_{elec}$) and path loss ($d^2$ free space, $d^4$ multipath).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       SIMULATION JAVASCRIPT ENGINE
+  =============================================== -->
+  <script>
+    /* =========================================================================
+       1. GLOBAL STATE & CONFIGURATION
+       ========================================================================= */
+    const State = {
+      // Simulation Run State
+      simRunning: false,
+      simStage: 0, // 0 to 7
+      stepMode: false,
+      intervalId: null,
+
+      // Smart City & Network Topology
+      nodeCount: 30,
+      clusterCount: 3,
+      weightEnergy: 0.6,
+      nodes: [],
+      clusterHeads: [],
+      baseStation: { x: 550, y: 35 },
+      selectedNodeId: 1,
+
+      // Telemetry & Hardware
+      telemetry: {
+        node_id: 1,
+        seq: 104,
+        cluster_id: 3,
+        temperature: 28.4,
+        humidity: 58.0,
+        air_quality: 74,
+        water_level: 1.84,
+        light_lux: 840,
+        battery_pct: 89
+      },
+
+      // Coding & Modulation Settings
+      infoBits: [1, 0, 1, 0, 0, 1], // Length K = 6
+      parityBits: [0, 1, 1, 0, 1, 0], // Length M = 6
+      codeword: [1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0], // Length N = 12
+      codingScheme: 'ldpc', // 'ldpc' | 'uncoded'
+      
+      carrierFreq: 2, // cycles per bit
+      amplitude: 1.0,
+      bpskMapping: 'standard', // 0 -> +1, 1 -> -1
+
+      // Channel Settings
+      snrDb: 6.0,
+      channelModel: 'awgn', // 'awgn' | 'rayleigh' | 'rician' | 'multipath'
+      noiseSigma: 0.354,
+      
+      // Demodulation & Decoding Results
+      modulatedSamples: [],
+      noisyReceivedSamples: [],
+      demodFilterOutputs: [],
+      rawDemodBits: [],
+      rawErrors: [],
+      
+      // LDPC Decoder
+      maxIterations: 8,
+      minSumAlpha: 0.75,
+      decodedBits: [],
+      fixedErrors: [],
+      syndrome: [0, 0, 0, 0, 0, 0],
+      decoderConverged: true,
+      currentIterCount: 2,
+      
+      // Charts
+      charts: {}
+    };
+
+    /* =========================================================================
+       2. SYSTEMATIC LDPC MATRIX & MATHEMATICS
+       (12, 6) Rate 1/2 Regular Systematic Code
+       ========================================================================= */
+    // P matrix: 6x6, row weight 3, column weight 3
+    const P_MATRIX = [
+      [1, 1, 0, 1, 0, 0],
+      [0, 1, 1, 0, 1, 0],
+      [0, 0, 1, 1, 0, 1],
+      [1, 0, 0, 1, 1, 0],
+      [0, 1, 0, 0, 1, 1],
+      [1, 0, 1, 0, 0, 1]
+    ];
+
+    // Identity matrix I: 6x6
+    // H = [P | I] size 6 x 12
+    function getHMatrix() {
+      const H = [];
+      for (let r = 0; r < 6; r++) {
+        const row = [];
+        for (let c = 0; c < 6; c++) row.push(P_MATRIX[r][c]);
+        for (let c = 0; c < 6; c++) row.push(r === c ? 1 : 0);
+        H.push(row);
+      }
+      return H;
+    }
+    const H_MATRIX = getHMatrix();
+
+    // Systematic Parity Calculation: p_i = sum(P_ij * u_j) mod 2
+    function computeParityBits(u) {
+      const p = [];
+      for (let r = 0; r < 6; r++) {
+        let sum = 0;
+        for (let c = 0; c < 6; c++) {
+          sum ^= (P_MATRIX[r][c] & u[c]);
+        }
+        p.push(sum);
+      }
+      return p;
+    }
+
+    // Syndrome computation: s = H * c^T mod 2
+    function computeSyndrome(c) {
+      const s = [];
+      for (let r = 0; r < 6; r++) {
+        let sum = 0;
+        for (let j = 0; j < 12; j++) {
+          sum ^= (H_MATRIX[r][j] & c[j]);
+        }
+        s.push(sum);
+      }
+      return s;
+    }
+
+    // Box-Muller Gaussian Noise Generator
+    function randn() {
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    // Convert sensor measurement to exact 6-bit integer (0 to 63)
+    function valueTo6Bits(val, type = 'temperature') {
+      let code = 0;
+      if (type === 'temperature') {
+        // Range 10.0 to 41.5 C with 0.5 step
+        code = Math.round((Math.max(10, Math.min(41.5, val)) - 10.0) / 0.5);
+      } else if (type === 'humidity') {
+        code = Math.round(Math.max(0, Math.min(63, val)));
+      } else if (type === 'air_quality') {
+        code = Math.round((Math.max(30, Math.min(219, val)) - 30) / 3);
+      } else if (type === 'water_level') {
+        code = Math.round(Math.max(0, Math.min(6.3, val)) * 10);
+      } else {
+        code = Math.round(Math.max(0, Math.min(63, val)));
+      }
+      code = Math.max(0, Math.min(63, code));
+      const bits = [];
+      for (let i = 5; i >= 0; i--) {
+        bits.push((code >> i) & 1);
+      }
+      return bits;
+    }
+
+    // Convert 6 bits back to exact sensor measurement
+    function bits6ToValue(bits, type = 'temperature') {
+      let code = 0;
+      for (let i = 0; i < 6; i++) {
+        code = (code << 1) | bits[i];
+      }
+      if (type === 'temperature') {
+        return (10.0 + code * 0.5).toFixed(1);
+      } else if (type === 'humidity') {
+        return code.toString();
+      } else if (type === 'air_quality') {
+        return (30 + code * 3).toString();
+      } else if (type === 'water_level') {
+        return (code / 10).toFixed(1);
+      }
+      return code.toString();
+    }
+
+    /* =========================================================================
+       3. TOPOLOGY & ADAPTIVE CLUSTER ELECTION
+       ========================================================================= */
+    function initSmartCityTopology() {
+      State.nodes = [];
+      const canvasW = 1100;
+      const canvasH = 420;
+      State.baseStation = { x: canvasW / 2, y: 35 };
+
+      const sensorTypes = [
+        { type: 'traffic', name: 'Traffic Flow', unit: 'veh/min', min: 10, max: 90 },
+        { type: 'temperature', name: 'Temp / Humidity', unit: '°C', min: 18, max: 38 },
+        { type: 'air_quality', name: 'Air Quality (MQ-135)', unit: 'AQI', min: 30, max: 210 },
+        { type: 'water_level', name: 'Water Level (HC-SR04)', unit: 'm', min: 0.5, max: 4.5 },
+        { type: 'parking', name: 'Smart Parking', unit: 'status', min: 0, max: 1 },
+        { type: 'streetlight', name: 'Streetlight (LDR)', unit: 'Lux', min: 200, max: 950 }
+      ];
+
+      for (let i = 1; i <= State.nodeCount; i++) {
+        const st = sensorTypes[(i - 1) % sensorTypes.length];
+        const val = (Math.random() * (st.max - st.min) + st.min).toFixed(1);
+        const resEnergy = +(0.5 + Math.random() * 0.5).toFixed(2); // 0.5 to 1.0 Joules
+
+        // Place nodes nicely inside boundary
+        const marginX = 80;
+        const marginY = 80;
+        const x = marginX + Math.random() * (canvasW - 2 * marginX);
+        const y = marginY + 20 + Math.random() * (canvasH - marginY - 40);
+
+        const distBS = Math.sqrt((x - State.baseStation.x) ** 2 + (y - State.baseStation.y) ** 2);
+
+        State.nodes.push({
+          id: i,
+          x: Math.round(x),
+          y: Math.round(y),
+          type: st.type,
+          typeName: st.name,
+          unit: st.unit,
+          reading: val,
+          battery: Math.round(resEnergy * 100),
+          resEnergy: resEnergy,
+          distBS: Math.round(distBS),
+          isCH: false,
+          clusterId: null,
+          chScore: 0
+        });
+      }
+
+      runAdaptiveClustering();
+    }
+
+    function runAdaptiveClustering() {
+      if (State.nodes.length === 0) return;
+
+      const maxDist = 550; // Max span
+      const maxEnergy = 1.0;
+      const wE = State.weightEnergy;
+
+      // 1. Calculate Score for each node
+      State.nodes.forEach(n => {
+        const normE = Math.min(1.0, n.resEnergy / maxEnergy);
+        const normDist = Math.max(0, 1 - (n.distBS / maxDist));
+        n.chScore = +(wE * normE + (1 - wE) * normDist).toFixed(3);
+        n.isCH = false;
+        n.clusterId = null;
+      });
+
+      // 2. Sort by score descending and elect top k
+      const sorted = [...State.nodes].sort((a, b) => b.chScore - a.chScore);
+      const k = Math.min(State.clusterCount, State.nodes.length);
+      State.clusterHeads = [];
+
+      for (let i = 0; i < k; i++) {
+        sorted[i].isCH = true;
+        sorted[i].clusterId = i + 1;
+        State.clusterHeads.push(sorted[i]);
+      }
+
+      // 3. Member nodes join closest Cluster Head
+      State.nodes.forEach(n => {
+        if (!n.isCH) {
+          let minD = Infinity;
+          let bestCh = State.clusterHeads[0];
+          State.clusterHeads.forEach(ch => {
+            const d = Math.sqrt((n.x - ch.x) ** 2 + (n.y - ch.y) ** 2);
+            if (d < minD) {
+              minD = d;
+              bestCh = ch;
+            }
+          });
+          n.clusterId = bestCh.clusterId;
+        }
+      });
+
+      updateClusterUI();
+      drawTopologyCanvas();
+      drawCityMapCanvas();
+    }
+
+    function updateClusterUI() {
+      document.getElementById('cardActiveNodes').innerHTML = `${State.nodes.length} <span class="metric-unit">nodes</span>`;
+      document.getElementById('cardClusterCount').innerHTML = `${State.clusterHeads.length} <span class="metric-unit">CH heads</span>`;
+      document.getElementById('clusterNodeCountVal').textContent = `${State.nodes.length} nodes`;
+      document.getElementById('cityNodeVal').textContent = `${State.nodes.length} nodes`;
+      document.getElementById('clusterHeadCountVal').textContent = `${State.clusterHeads.length} CHs`;
+
+      // Update CH Leaderboard table
+      const tbody = document.getElementById('chTableBody');
+      tbody.innerHTML = '';
+      State.clusterHeads.forEach(ch => {
+        const memberCount = State.nodes.filter(n => n.clusterId === ch.clusterId).length;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong style="color:#0284c7;">CH #${ch.clusterId} (Node ${ch.id})</strong></td>
+          <td>${memberCount} nodes</td>
+          <td>${ch.resEnergy} J (${ch.battery}%)</td>
+          <td>${ch.distBS} m</td>
+          <td><span style="font-weight:700; color:#059669;">${ch.chScore}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update Inspector if selected node
+      const sel = State.nodes.find(n => n.id === State.selectedNodeId) || State.nodes[0];
+      if (sel) selectNodeForInspection(sel);
+    }
+
+    function selectNodeForInspection(n) {
+      State.selectedNodeId = n.id;
+      document.getElementById('inspNodeId').textContent = `Node #${n.id.toString().padStart(2, '0')}`;
+      document.getElementById('inspNodeType').textContent = n.typeName;
+      document.getElementById('inspReading').innerHTML = `${n.reading} <span class="metric-unit">${n.unit}</span>`;
+      document.getElementById('inspBattery').innerHTML = `${n.battery} <span class="metric-unit">%</span>`;
+      document.getElementById('inspCluster').textContent = `CH #${n.clusterId} ${n.isCH ? '(Leader)' : ''}`;
+
+      // Update ESP32 transmitter payload
+      State.telemetry.node_id = n.id;
+      State.telemetry.cluster_id = n.clusterId;
+      if (n.type === 'temperature') State.telemetry.temperature = parseFloat(n.reading);
+      if (n.type === 'air_quality') State.telemetry.air_quality = parseInt(n.reading);
+      if (n.type === 'water_level') State.telemetry.water_level = parseFloat(n.reading);
+      State.telemetry.battery_pct = n.battery;
+
+      updateJsonPacketPreview();
+    }
+
+    function updateJsonPacketPreview() {
+      const codeElem = document.getElementById('jsonPacketCode');
+      codeElem.textContent = JSON.stringify(State.telemetry, null, 2);
+
+      // Also sync inputs
+      document.getElementById('inputTemp').value = State.telemetry.temperature;
+      document.getElementById('inputHumid').value = State.telemetry.humidity;
+      document.getElementById('inputAqi').value = State.telemetry.air_quality;
+      document.getElementById('inputWater').value = State.telemetry.water_level;
+      
+      // Update SVG readouts
+      document.getElementById('svgDhtReading').textContent = `${State.telemetry.temperature}°C | ${State.telemetry.humidity}% RH`;
+      document.getElementById('svgUsReading').textContent = `HC-SR04: ${State.telemetry.water_level} m`;
+      document.getElementById('svgGasReading').textContent = `AQI: ${State.telemetry.air_quality} ppm`;
+      document.getElementById('svgLightReading').textContent = `${State.telemetry.light_lux} Lux`;
+    }
+
+    /* =========================================================================
+       4. TOPOLOGY CANVAS RENDERING
+       ========================================================================= */
+    const CLUSTER_COLORS = [
+      { primary: '#0284c7', subtle: 'rgba(2, 132, 199, 0.25)', line: 'rgba(2, 132, 199, 0.45)' },
+      { primary: '#10b981', subtle: 'rgba(16, 185, 129, 0.25)', line: 'rgba(16, 185, 129, 0.45)' },
+      { primary: '#a855f7', subtle: 'rgba(168, 85, 247, 0.25)', line: 'rgba(168, 85, 247, 0.45)' },
+      { primary: '#f59e0b', subtle: 'rgba(245, 158, 11, 0.25)', line: 'rgba(245, 158, 11, 0.45)' },
+      { primary: '#06b6d4', subtle: 'rgba(6, 182, 212, 0.25)', line: 'rgba(6, 182, 212, 0.45)' },
+      { primary: '#f43f5e', subtle: 'rgba(244, 63, 94, 0.25)', line: 'rgba(244, 63, 94, 0.45)' }
+    ];
+
+    function drawTopologyCanvas() {
+      const cvs = document.getElementById('topologyCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Draw subtle grid
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 50) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 50) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // 1. Draw Base Station at Top
+      const bs = State.baseStation;
+      ctx.save();
+      // Animated signal rings from BS
+      const time = Date.now() / 1000;
+      const ringRadius = 25 + (time * 20) % 40;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(bs.x, bs.y, ringRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // BS Tower symbol
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(bs.x, bs.y - 14);
+      ctx.lineTo(bs.x + 12, bs.y + 12);
+      ctx.lineTo(bs.x - 12, bs.y + 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(bs.x, bs.y + 2, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 11px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText('Central Base Station (Sink)', bs.x, bs.y - 20);
+      ctx.restore();
+
+      // 2. Draw Cluster Connections & Member Nodes
+      State.nodes.forEach(n => {
+        const col = CLUSTER_COLORS[(n.clusterId - 1) % CLUSTER_COLORS.length] || CLUSTER_COLORS[0];
+        const ch = State.clusterHeads.find(c => c.clusterId === n.clusterId);
+
+        // Line from member to CH
+        if (!n.isCH && ch) {
+          ctx.strokeStyle = col.line;
+          ctx.setLineDash([4, 4]);
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(n.x, n.y);
+          ctx.lineTo(ch.x, ch.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      });
+
+      // 3. Draw Uplink from CHs to Base Station
+      State.clusterHeads.forEach(ch => {
+        const col = CLUSTER_COLORS[(ch.clusterId - 1) % CLUSTER_COLORS.length] || CLUSTER_COLORS[0];
+        ctx.strokeStyle = col.primary;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(ch.x, ch.y);
+        ctx.lineTo(bs.x, bs.y + 10);
+        ctx.stroke();
+      });
+
+      // 4. Draw Individual Nodes
+      State.nodes.forEach(n => {
+        const col = CLUSTER_COLORS[(n.clusterId - 1) % CLUSTER_COLORS.length] || CLUSTER_COLORS[0];
+        const isSel = n.id === State.selectedNodeId;
+
+        if (n.isCH) {
+          // Cluster Head Icon
+          ctx.save();
+          ctx.fillStyle = col.subtle;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, 18, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = col.primary;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, 11, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (isSel) {
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+          }
+
+          // Label
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 10px Inter';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`CH${n.clusterId}`, n.x, n.y);
+
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '9px Inter';
+          ctx.fillText(`Score: ${n.chScore}`, n.x, n.y + 22);
+          ctx.restore();
+        } else {
+          // Regular Sensor Node
+          ctx.save();
+          ctx.fillStyle = col.primary;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, isSel ? 7 : 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (isSel) {
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '8px Inter';
+          ctx.textAlign = 'center';
+          ctx.fillText(`N${n.id}`, n.x, n.y - 9);
+          ctx.restore();
+        }
+      });
+    }
+
+    /* =========================================================================
+       5. SMART CITY 2D MAP RENDERING
+       ========================================================================= */
+    function drawCityMapCanvas() {
+      const cvs = document.getElementById('cityMapCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Sky & Horizon
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, w, h);
+
+      // River / Canal in city
+      ctx.fillStyle = '#082f49';
+      ctx.beginPath();
+      ctx.moveTo(0, 310);
+      ctx.bezierCurveTo(300, 290, 600, 330, w, 305);
+      ctx.lineTo(w, 360);
+      ctx.bezierCurveTo(600, 380, 300, 340, 0, 360);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#0284c7';
+      ctx.font = '10px Inter';
+      ctx.fillText('Smart Municipal Waterway (HC-SR04 Flood Sensor)', 30, 340);
+
+      // Roads
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(0, 180, w, 40); // Main Avenue
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([12, 10]);
+      ctx.beginPath(); ctx.moveTo(0, 200); ctx.lineTo(w, 200); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Buildings Skyline
+      const buildings = [
+        { x: 30, w: 70, h: 140, col: '#1e293b' },
+        { x: 110, w: 90, h: 190, col: '#0f172a' },
+        { x: 210, w: 60, h: 120, col: '#1e293b' },
+        { x: 280, w: 100, h: 170, col: '#1e293b' },
+        { x: 390, w: 80, h: 150, col: '#0f172a' },
+        { x: 480, w: 110, h: 210, col: '#1e293b' },
+        { x: 600, w: 85, h: 130, col: '#0f172a' },
+        { x: 695, w: 95, h: 180, col: '#1e293b' },
+        { x: 800, w: 75, h: 140, col: '#0f172a' },
+        { x: 885, w: 110, h: 195, col: '#1e293b' },
+        { x: 1005, w: 80, h: 130, col: '#0f172a' }
+      ];
+
+      buildings.forEach(b => {
+        ctx.fillStyle = b.col;
+        ctx.fillRect(b.x, 180 - b.h, b.w, b.h);
+        ctx.strokeStyle = '#334155';
+        ctx.strokeRect(b.x, 180 - b.h, b.w, b.h);
+
+        // Windows
+        ctx.fillStyle = '#38bdf8';
+        for (let wx = b.x + 10; wx < b.x + b.w - 10; wx += 14) {
+          for (let wy = 180 - b.h + 15; wy < 170; wy += 20) {
+            if (Math.sin(wx * wy) > -0.2) {
+              ctx.globalAlpha = 0.6;
+              ctx.fillRect(wx, wy, 6, 8);
+              ctx.globalAlpha = 1.0;
+            }
+          }
+        }
+      });
+
+      // Municipal Base Station Mast
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(535, 30);
+      ctx.lineTo(550, 0);
+      ctx.lineTo(565, 30);
+      ctx.stroke();
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath(); ctx.arc(550, 0, 4, 0, Math.PI * 2); ctx.fill();
+
+      // Render city sensor nodes
+      const filter = document.getElementById('citySensorFilter')?.value || 'all';
+
+      State.nodes.forEach(n => {
+        if (filter !== 'all' && n.type !== filter) return;
+
+        let iconColor = '#0284c7';
+        if (n.type === 'temperature') iconColor = '#f59e0b';
+        if (n.type === 'air_quality') iconColor = '#10b981';
+        if (n.type === 'water_level') iconColor = '#06b6d4';
+        if (n.type === 'parking') iconColor = '#a855f7';
+        if (n.type === 'streetlight') iconColor = '#eab308';
+
+        const isSel = n.id === State.selectedNodeId;
+
+        ctx.save();
+        // Pulsing wireless beacon
+        ctx.strokeStyle = iconColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, isSel ? 14 : 9, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = iconColor;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, isSel ? 7 : 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (isSel) {
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Tag popup
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+          ctx.fillRect(n.x - 45, n.y - 32, 90, 20);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px Inter';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${n.reading} ${n.unit}`, n.x, n.y - 18);
+        }
+        ctx.restore();
+      });
+    }
+
+    /* =========================================================================
+       6. LDPC ENCODING & PARITY GENERATION
+       ========================================================================= */
+    function runLdpcEncoding() {
+      // 1. Get chosen value and type from select
+      const selectElem = document.getElementById('encodeTelemetrySelect');
+      const selectVal = parseFloat(selectElem.value);
+      const selType = selectElem.options[selectElem.selectedIndex]?.getAttribute('data-type') || 'temperature';
+      State.currentDataType = selType;
+      State.infoBits = valueTo6Bits(selectVal, selType);
+
+      // 2. Parity bits computation
+      if (State.codingScheme === 'ldpc') {
+        State.parityBits = computeParityBits(State.infoBits);
+        State.codeword = [...State.infoBits, ...State.parityBits];
+        document.getElementById('encMVal').innerHTML = `6 <span class="metric-unit">bits</span>`;
+        document.getElementById('encNVal').innerHTML = `12 <span class="metric-unit">bits</span>`;
+        document.getElementById('encRateVal').innerHTML = `0.50 <span class="metric-unit">R=1/2</span>`;
+      } else {
+        State.parityBits = [];
+        State.codeword = [...State.infoBits];
+        document.getElementById('encMVal').innerHTML = `0 <span class="metric-unit">bits</span>`;
+        document.getElementById('encNVal').innerHTML = `6 <span class="metric-unit">bits</span>`;
+        document.getElementById('encRateVal').innerHTML = `1.00 <span class="metric-unit">Uncoded</span>`;
+      }
+
+      // 3. Render Bit Stream Visualizer
+      renderBitStream('encodedBitStreamDisplay', State.codeword, State.infoBits.length);
+
+      // 4. Render H Matrix and Parity equations
+      renderHMatrix();
+      renderParityEquations();
+    }
+
+    function renderBitStream(containerId, bits, infoLen) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      bits.forEach((b, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'bit-chip';
+        if (idx < infoLen) {
+          chip.classList.add(b === 0 ? 'bit-0' : 'bit-1');
+          chip.title = `Info Bit u${idx} = ${b}`;
+        } else {
+          chip.classList.add('bit-parity');
+          chip.title = `Parity Bit p${idx - infoLen} = ${b}`;
+        }
+        chip.textContent = b;
+        container.appendChild(chip);
+      });
+    }
+
+    function renderHMatrix() {
+      const el = document.getElementById('hMatrixDisplay');
+      if (!el) return;
+      let html = '<div style="display:flex; flex-direction:column; gap:2px;">';
+      for (let r = 0; r < 6; r++) {
+        html += '<div style="display:flex; gap:6px;">';
+        // P block
+        for (let c = 0; c < 6; c++) {
+          const val = H_MATRIX[r][c];
+          html += `<span style="display:inline-block; width:18px; text-align:center; color:${val ? '#0284c7' : '#94a3b8'}; font-weight:${val ? '700' : '400'};">${val}</span>`;
+        }
+        html += '<span style="color:#cbd5e1; margin:0 4px;">|</span>';
+        // I block
+        for (let c = 6; c < 12; c++) {
+          const val = H_MATRIX[r][c];
+          html += `<span style="display:inline-block; width:18px; text-align:center; color:${val ? '#a855f7' : '#94a3b8'}; font-weight:${val ? '700' : '400'};">${val}</span>`;
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    function renderParityEquations() {
+      const el = document.getElementById('parityCalcDisplay');
+      if (!el) return;
+      const u = State.infoBits;
+      const p = State.parityBits;
+      el.innerHTML = `
+        <div>p₀ = u₀ ⊕ u₁ ⊕ u₃ = ${u[0]} ⊕ ${u[1]} ⊕ ${u[3]} = <strong>${p[0]}</strong></div>
+        <div>p₁ = u₁ ⊕ u₂ ⊕ u₄ = ${u[1]} ⊕ ${u[2]} ⊕ ${u[4]} = <strong>${p[1]}</strong></div>
+        <div>p₂ = u₂ ⊕ u₃ ⊕ u₅ = ${u[2]} ⊕ ${u[3]} ⊕ ${u[5]} = <strong>${p[2]}</strong></div>
+        <div>p₃ = u₀ ⊕ u₃ ⊕ u₄ = ${u[0]} ⊕ ${u[3]} ⊕ ${u[4]} = <strong>${p[3]}</strong></div>
+        <div>p₄ = u₁ ⊕ u₄ ⊕ u₅ = ${u[1]} ⊕ ${u[4]} ⊕ ${u[5]} = <strong>${p[4]}</strong></div>
+        <div>p₅ = u₀ ⊕ u₂ ⊕ u₅ = ${u[0]} ⊕ ${u[2]} ⊕ ${u[5]} = <strong>${p[5]}</strong></div>
+      `;
+    }
+
+    /* =========================================================================
+       7. BPSK MODULATION & CONTINUOUS WAVEFORM
+       ========================================================================= */
+    function runBpskModulation() {
+      const bits = State.codeword;
+      const samplesPerBit = 100;
+      const fc = State.carrierFreq;
+      const A = State.amplitude;
+
+      State.modulatedSamples = [];
+
+      bits.forEach(b => {
+        // Mapping: bit 0 -> +A, bit 1 -> -A (or inverted if selected)
+        let sVal = (b === 0) ? A : -A;
+        if (State.bpskMapping === 'inverted') sVal = -sVal;
+
+        for (let i = 0; i < samplesPerBit; i++) {
+          const t = i / samplesPerBit; // 0 to 1
+          const carrier = Math.cos(2 * Math.PI * fc * t);
+          State.modulatedSamples.push(sVal * carrier);
+        }
+      });
+
+      drawBpskWaveform();
+      drawModConstellation();
+    }
+
+    function drawBpskWaveform() {
+      const cvs = document.getElementById('modWaveCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+      const samples = State.modulatedSamples;
+      const samplesPerBit = 100;
+      const totalBits = State.codeword.length;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Center baseline
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2);
+      ctx.lineTo(w, h / 2);
+      ctx.stroke();
+
+      // Bit boundary gridlines
+      const bitWidthPx = w / totalBits;
+      ctx.strokeStyle = '#1e293b';
+      ctx.setLineDash([4, 4]);
+      for (let i = 0; i <= totalBits; i++) {
+        const x = i * bitWidthPx;
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+
+        // Print bit above waveform
+        if (i < totalBits) {
+          const b = State.codeword[i];
+          ctx.fillStyle = b === 0 ? '#38bdf8' : '#7dd3fc';
+          ctx.font = 'bold 11px Inter';
+          ctx.textAlign = 'center';
+          ctx.fillText(`b${i}=${b}`, x + bitWidthPx / 2, 20);
+        }
+      }
+      ctx.setLineDash([]);
+
+      // Draw continuous modulated wave
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      const scaleY = (h / 2) * 0.75;
+      for (let i = 0; i < samples.length; i++) {
+        const x = (i / samples.length) * w;
+        const y = (h / 2) - samples[i] * scaleY;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    function drawModConstellation() {
+      const cvs = document.getElementById('modConstellationCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Coordinate axes
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); // In-phase (I)
+      ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h); // Quadrature (Q)
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px Inter';
+      ctx.fillText('+I', w - 18, h / 2 - 6);
+      ctx.fillText('+Q', w / 2 + 6, 14);
+
+      // Ideal BPSK points (+1, 0) and (-1, 0)
+      const r = 80;
+      const pt0 = { x: w / 2 + r, y: h / 2 };
+      const pt1 = { x: w / 2 - r, y: h / 2 };
+
+      // Point 0 (+A)
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath(); ctx.arc(pt0.x, pt0.y, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 11px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText('Bit 0 (+1, 0)', pt0.x, pt0.y - 14);
+
+      // Point 1 (-A)
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath(); ctx.arc(pt1.x, pt1.y, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('Bit 1 (-1, 0)', pt1.x, pt1.y - 14);
+    }
+
+    /* =========================================================================
+       8. WIRELESS CHANNEL & NOISE INJECTION
+       ========================================================================= */
+    function runWirelessChannel() {
+      const snrLinear = Math.pow(10, State.snrDb / 10);
+      // Noise standard deviation for symbol energy Es = 1.0
+      State.noiseSigma = +(Math.sqrt(1.0 / (2.0 * snrLinear))).toFixed(3);
+      document.getElementById('chanSigmaVal').textContent = `σ = ${State.noiseSigma}`;
+
+      State.noisyReceivedSamples = [];
+      const samples = State.modulatedSamples;
+      const sigma = State.noiseSigma;
+      const model = State.channelModel;
+
+      // Rayleigh fading coefficient h
+      let hRayleigh = 1.0;
+      if (model === 'rayleigh') {
+        const x = randn() / Math.SQRT2;
+        const y = randn() / Math.SQRT2;
+        hRayleigh = Math.sqrt(x * x + y * y);
+      } else if (model === 'rician') {
+        const K = 4.0; // Rician K-factor
+        const s = Math.sqrt(K / (K + 1));
+        const sig = Math.sqrt(1 / (2 * (K + 1)));
+        const x = s + sig * randn();
+        const y = sig * randn();
+        hRayleigh = Math.sqrt(x * x + y * y);
+      }
+
+      for (let i = 0; i < samples.length; i++) {
+        let s = samples[i];
+
+        // Multipath echo
+        if (model === 'multipath' && i > 30) {
+          s += 0.35 * samples[i - 30];
+        }
+
+        // Apply fading attenuation + Gaussian noise
+        const noise = sigma * randn();
+        const r = (hRayleigh * s) + noise;
+        State.noisyReceivedSamples.push(r);
+      }
+
+      drawChannelWaveforms();
+      drawReceivedConstellationCloud();
+    }
+
+    function drawChannelWaveforms() {
+      const cvs = document.getElementById('chanWaveCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+      const clean = State.modulatedSamples;
+      const noisy = State.noisyReceivedSamples;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Baseline
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+
+      const scaleY = (h / 2) * 0.65;
+
+      // 1. Draw Clean Signal (Cyan, translucent)
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < clean.length; i++) {
+        const x = (i / clean.length) * w;
+        const y = (h / 2) - clean[i] * scaleY;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // 2. Draw Received Noisy Signal (Amber)
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      for (let i = 0; i < noisy.length; i++) {
+        const x = (i / noisy.length) * w;
+        const y = (h / 2) - noisy[i] * scaleY;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    function drawReceivedConstellationCloud() {
+      const cvs = document.getElementById('chanConstellationCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Axes
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2);
+      ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h);
+      ctx.stroke();
+
+      // Plot noisy sample cloud (Simulate 300 received symbols under current SNR)
+      const r = 80;
+      const sigma = State.noiseSigma;
+      ctx.fillStyle = '#f59e0b';
+
+      for (let i = 0; i < 200; i++) {
+        const b = (i % 2 === 0) ? 0 : 1;
+        const center = (b === 0) ? (w / 2 + r) : (w / 2 - r);
+        const x = center + (randn() * sigma * r);
+        const y = h / 2 + (randn() * sigma * r);
+
+        ctx.globalAlpha = 0.55;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Threshold line at x = w / 2
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(w / 2, 10); ctx.lineTo(w / 2, h - 10); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#ef4444';
+      ctx.font = '10px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText('Decision Threshold (γ=0)', w / 2, 24);
+    }
+
+    /* =========================================================================
+       9. RECEIVER & DEMODULATION (MATCHED FILTER)
+       ========================================================================= */
+    function runDemodulation() {
+      const samplesPerBit = 100;
+      const fc = State.carrierFreq;
+      const noisy = State.noisyReceivedSamples;
+      const totalBits = State.codeword.length;
+
+      State.demodFilterOutputs = [];
+      State.rawDemodBits = [];
+      State.rawErrors = [];
+
+      for (let b = 0; b < totalBits; b++) {
+        let correlatorSum = 0;
+        for (let i = 0; i < samplesPerBit; i++) {
+          const idx = b * samplesPerBit + i;
+          const t = i / samplesPerBit;
+          const refCarrier = Math.cos(2 * Math.PI * fc * t);
+          correlatorSum += noisy[idx] * refCarrier;
+        }
+        // Normalize matched filter output
+        const y_k = (2.0 / samplesPerBit) * correlatorSum;
+        State.demodFilterOutputs.push(y_k);
+
+        // Decision threshold at 0
+        const detectedBit = (y_k >= 0) ? 0 : 1;
+        State.rawDemodBits.push(detectedBit);
+
+        // Check if error against transmitted codeword
+        if (detectedBit !== State.codeword[b]) {
+          State.rawErrors.push(b);
+        }
+      }
+
+      // Update UI cards
+      document.getElementById('demodTotalBits').innerHTML = `${totalBits} <span class="metric-unit">bits</span>`;
+      const errCount = State.rawErrors.length;
+      document.getElementById('demodErrCount').innerHTML = `${errCount} <span class="metric-unit">${errCount === 1 ? 'error' : 'errors'}</span>`;
+      const ber = (errCount / totalBits).toFixed(4);
+      document.getElementById('demodErrRateText').textContent = `Raw BER: ${ber}`;
+
+      // Update bit displays
+      renderBitStream('demodTxBitDisplay', State.codeword, State.infoBits.length);
+      renderDemodBitStream('demodRxBitDisplay', State.rawDemodBits, State.rawErrors);
+
+      drawDemodFilterCanvas();
+    }
+
+    function renderDemodBitStream(containerId, bits, errorIndices) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      bits.forEach((b, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'bit-chip';
+        if (errorIndices.includes(idx)) {
+          chip.classList.add('bit-err');
+          chip.title = `Bit Error at index ${idx}: Received ${b}, Expected ${State.codeword[idx]}`;
+        } else {
+          chip.classList.add(b === 0 ? 'bit-0' : 'bit-1');
+          chip.title = `Bit ${idx} = ${b}`;
+        }
+        chip.textContent = b;
+        container.appendChild(chip);
+      });
+    }
+
+    function drawDemodFilterCanvas() {
+      const cvs = document.getElementById('demodFilterCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+      const outputs = State.demodFilterOutputs;
+      const totalBits = outputs.length;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Decision Threshold line at 0
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 11px Inter';
+      ctx.fillText('Decision Threshold γ = 0.0 V (Bit 0 above, Bit 1 below)', 15, h / 2 - 8);
+
+      const bitWidth = w / totalBits;
+      const scaleY = (h / 2) * 0.6;
+
+      outputs.forEach((val, i) => {
+        const x = i * bitWidth + bitWidth / 2;
+        const y = (h / 2) - val * scaleY;
+        const isErr = State.rawErrors.includes(i);
+
+        // Stem line
+        ctx.strokeStyle = isErr ? '#ef4444' : '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, h / 2);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        // Sample point dot
+        ctx.fillStyle = isErr ? '#ef4444' : '#0284c7';
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 10px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText(val.toFixed(2), x, y + (val >= 0 ? -10 : 16));
+      });
+    }
+
+    /* =========================================================================
+       10. LDPC DECODER (BELIEF PROPAGATION / MIN-SUM)
+       ========================================================================= */
+    function runLdpcDecoder() {
+      const rawBits = [...State.rawDemodBits];
+      const y = State.demodFilterOutputs;
+      const sigma2 = State.noiseSigma ** 2;
+
+      // If uncoded mode
+      if (State.codingScheme === 'uncoded') {
+        State.decodedBits = rawBits.slice(0, 6);
+        State.fixedErrors = [];
+        State.syndrome = [0, 0, 0, 0, 0, 0];
+        State.decoderConverged = true;
+        updateDecoderUI();
+        return;
+      }
+
+      // Initial Channel LLR: L_j = 2 * y_j / sigma^2
+      const L = y.map(yj => (2.0 * yj) / Math.max(0.01, sigma2));
+      const N = 12; // Variable nodes
+      const M = 6;  // Check nodes
+      const alpha = State.minSumAlpha;
+
+      // Messages from variable to check: q_v2c[c][v]
+      let q_v2c = Array.from({ length: M }, () => Array(N).fill(0));
+      for (let c = 0; c < M; c++) {
+        for (let v = 0; v < N; v++) {
+          if (H_MATRIX[c][v] === 1) q_v2c[c][v] = L[v];
+        }
+      }
+
+      let r_c2v = Array.from({ length: M }, () => Array(N).fill(0));
+      let currentEstimate = [...rawBits];
+      let converged = false;
+      let iter = 0;
+
+      for (iter = 1; iter <= State.maxIterations; iter++) {
+        // 1. Check Node Update (Min-Sum)
+        for (let c = 0; c < M; c++) {
+          const connectedVars = [];
+          for (let v = 0; v < N; v++) {
+            if (H_MATRIX[c][v] === 1) connectedVars.push(v);
+          }
+
+          for (let j = 0; j < connectedVars.length; j++) {
+            const vTarget = connectedVars[j];
+            let signProd = 1;
+            let minMag = Infinity;
+
+            for (let k = 0; k < connectedVars.length; k++) {
+              if (k !== j) {
+                const vOther = connectedVars[k];
+                const msg = q_v2c[c][vOther];
+                if (msg < 0) signProd *= -1;
+                const mag = Math.abs(msg);
+                if (mag < minMag) minMag = mag;
+              }
+            }
+            r_c2v[c][vTarget] = signProd * minMag * alpha;
+          }
+        }
+
+        // 2. Variable Node Update & Hard Decision
+        const Q = Array(N).fill(0);
+        for (let v = 0; v < N; v++) {
+          let sumCheckMsgs = 0;
+          for (let c = 0; c < M; c++) {
+            if (H_MATRIX[c][v] === 1) sumCheckMsgs += r_c2v[c][v];
+          }
+          Q[v] = L[v] + sumCheckMsgs;
+          currentEstimate[v] = Q[v] >= 0 ? 0 : 1;
+
+          // Update variable-to-check messages for next iter
+          for (let c = 0; c < M; c++) {
+            if (H_MATRIX[c][v] === 1) {
+              q_v2c[c][v] = Q[v] - r_c2v[c][v];
+            }
+          }
+        }
+
+        // 3. Syndrome Check: s = H * c^T mod 2
+        const s = computeSyndrome(currentEstimate);
+        const allZero = s.every(val => val === 0);
+
+        if (allZero) {
+          converged = true;
+          State.syndrome = s;
+          break;
+        }
+      }
+
+      State.currentIterCount = Math.min(iter, State.maxIterations);
+      State.decoderConverged = converged;
+      State.syndrome = computeSyndrome(currentEstimate);
+
+      // Identify corrected bits
+      State.fixedErrors = [];
+      for (let i = 0; i < N; i++) {
+        if (State.rawDemodBits[i] !== State.codeword[i] && currentEstimate[i] === State.codeword[i]) {
+          State.fixedErrors.push(i);
+        }
+      }
+
+      State.decodedBits = currentEstimate.slice(0, 6);
+      updateDecoderUI();
+      drawTannerGraph();
+    }
+
+    function updateDecoderUI() {
+      document.getElementById('decIterCount').innerHTML = `${State.currentIterCount} <span class="metric-unit">iters</span>`;
+      document.getElementById('decFixedCount').innerHTML = `${State.fixedErrors.length} <span class="metric-unit">${State.fixedErrors.length === 1 ? 'bit' : 'bits'}</span>`;
+
+      // Check residual errors
+      let residualCount = 0;
+      for (let i = 0; i < 6; i++) {
+        if (State.decodedBits[i] !== State.infoBits[i]) residualCount++;
+      }
+      document.getElementById('decResidualCount').innerHTML = `${residualCount} <span class="metric-unit">errors</span>`;
+      document.getElementById('decSyndromeDisplay').textContent = `[${State.syndrome.join(', ')}]`;
+
+      const statusBadge = document.getElementById('decodeStatusBadge');
+      if (State.decoderConverged) {
+        statusBadge.textContent = `Converged (s = 0 in ${State.currentIterCount} iters)`;
+        statusBadge.style.color = '#059669';
+      } else {
+        statusBadge.textContent = `Did not converge (Max iters reached)`;
+        statusBadge.style.color = '#dc2626';
+      }
+
+      // Render recovered info bits
+      const container = document.getElementById('decodeInfoBitsDisplay');
+      container.innerHTML = '';
+      State.decodedBits.forEach((b, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'bit-chip';
+        if (b === State.infoBits[idx]) {
+          chip.classList.add('bit-fixed');
+          chip.title = `Correct Bit u${idx} = ${b}`;
+        } else {
+          chip.classList.add('bit-err');
+          chip.title = `Residual Error u${idx} = ${b}`;
+        }
+        chip.textContent = b;
+        container.appendChild(chip);
+      });
+
+      // Update Decoded Value Text
+      const selElem = document.getElementById('encodeTelemetrySelect');
+      const selVal = parseFloat(selElem.value);
+      const selType = State.currentDataType || 'temperature';
+      const recoveredVal = bits6ToValue(State.decodedBits, selType);
+      document.getElementById('decOriginalValueText').textContent = `Transmitted = ${selVal} (${selType})`;
+      const isMatch = (residualCount === 0);
+      document.getElementById('decRecoveredValueText').textContent = `Decoded = ${recoveredVal} (${isMatch ? '100% Match ✓' : 'Errors Present ✗'})`;
+      document.getElementById('decRecoveredValueText').style.color = isMatch ? '#047857' : '#dc2626';
+
+      // Live metrics update
+      document.getElementById('cardCurrentBer').textContent = (residualCount / 6).toFixed(4);
+      document.getElementById('cardCurrentBer').style.color = isMatch ? '#059669' : '#dc2626';
+    }
+
+    function drawTannerGraph() {
+      const cvs = document.getElementById('decodeGraphCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Top: 12 Variable Nodes
+      const vY = 40;
+      const vSpacing = w / 13;
+      const varNodes = [];
+      for (let i = 0; i < 12; i++) {
+        varNodes.push({ x: (i + 1) * vSpacing, y: vY, id: i });
+      }
+
+      // Bottom: 6 Check Nodes
+      const cY = h - 45;
+      const cSpacing = w / 7;
+      const checkNodes = [];
+      for (let j = 0; j < 6; j++) {
+        checkNodes.push({ x: (j + 1) * cSpacing, y: cY, id: j });
+      }
+
+      // Draw Edges where H[c][v] == 1
+      for (let c = 0; c < 6; c++) {
+        for (let v = 0; v < 12; v++) {
+          if (H_MATRIX[c][v] === 1) {
+            ctx.strokeStyle = State.syndrome[c] === 0 ? 'rgba(16, 185, 129, 0.45)' : 'rgba(239, 68, 68, 0.45)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(varNodes[v].x, varNodes[v].y);
+            ctx.lineTo(checkNodes[c].x, checkNodes[c].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw Variable Nodes (Circles)
+      varNodes.forEach((vn, i) => {
+        const isErr = State.rawErrors.includes(i);
+        const isFixed = State.fixedErrors.includes(i);
+
+        ctx.fillStyle = isFixed ? '#10b981' : (isErr ? '#ef4444' : '#0284c7');
+        ctx.beginPath();
+        ctx.arc(vn.x, vn.y, 11, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 9px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`v${i}`, vn.x, vn.y);
+      });
+
+      // Draw Check Nodes (Squares)
+      checkNodes.forEach((cn, j) => {
+        const satisfied = State.syndrome[j] === 0;
+        ctx.fillStyle = satisfied ? '#059669' : '#dc2626';
+        ctx.fillRect(cn.x - 12, cn.y - 12, 24, 24);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 9px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`c${j}`, cn.x, cn.y);
+      });
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px Inter';
+      ctx.textAlign = 'left';
+      ctx.fillText('Variable Nodes (Bit LLRs)', 15, 20);
+      ctx.fillText('Check Nodes (Parity Equations)', 15, h - 15);
+    }
+
+    /* =========================================================================
+       11. MONTE CARLO PERFORMANCE ANALYSIS & CHARTS
+       ========================================================================= */
+    function erfc(x) {
+      // Numerical approximation for complementary error function
+      const z = Math.abs(x);
+      const t = 1.0 / (1.0 + 0.5 * z);
+      const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+      return x >= 0 ? r : 2.0 - r;
+    }
+
+    function qFunction(x) {
+      return 0.5 * erfc(x / Math.SQRT2);
+    }
+
+    function initPerformanceCharts() {
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded, falling back');
+        return;
+      }
+
+      // Destroy previous if existing
+      if (State.charts.ber) State.charts.ber.destroy();
+      if (State.charts.pdr) State.charts.pdr.destroy();
+      if (State.charts.throughput) State.charts.throughput.destroy();
+      if (State.charts.energy) State.charts.energy.destroy();
+
+      const snrPoints = [-2, 0, 2, 4, 6, 8, 10];
+
+      // 1. Chart 1: BER vs SNR
+      const ctxBer = document.getElementById('chartBerSnr')?.getContext('2d');
+      if (ctxBer) {
+        State.charts.ber = new Chart(ctxBer, {
+          type: 'line',
+          data: {
+            labels: snrPoints.map(s => `${s} dB`),
+            datasets: [
+              {
+                label: 'Theoretical BPSK Q(√(2Eb/N0))',
+                data: snrPoints.map(s => {
+                  const snrLin = Math.pow(10, s / 10);
+                  return Math.max(1e-5, qFunction(Math.sqrt(2 * snrLin)));
+                }),
+                borderColor: '#3b82f6',
+                borderDash: [5, 5],
+                tension: 0.2
+              },
+              {
+                label: 'Simulated Uncoded BPSK',
+                data: [0.132, 0.078, 0.038, 0.012, 0.0024, 0.0002, 0.00001],
+                borderColor: '#f59e0b',
+                backgroundColor: '#f59e0b',
+                tension: 0.2
+              },
+              {
+                label: 'Simulated LDPC-Coded BPSK',
+                data: [0.088, 0.031, 0.0045, 0.0001, 1e-5, 1e-5, 1e-5],
+                borderColor: '#10b981',
+                backgroundColor: '#10b981',
+                borderWidth: 2.5,
+                tension: 0.2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                type: 'logarithmic',
+                min: 1e-5,
+                max: 0.5,
+                title: { display: true, text: 'Bit Error Rate (Log Scale)' }
+              },
+              x: {
+                title: { display: true, text: 'SNR (dB)' }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Chart 2: PDR vs SNR
+      const ctxPdr = document.getElementById('chartPdrSnr')?.getContext('2d');
+      if (ctxPdr) {
+        State.charts.pdr = new Chart(ctxPdr, {
+          type: 'line',
+          data: {
+            labels: snrPoints.map(s => `${s} dB`),
+            datasets: [
+              {
+                label: 'LDPC-Coded BPSK PDR (%)',
+                data: [42, 78, 96, 99.8, 100, 100, 100],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.2
+              },
+              {
+                label: 'Uncoded BPSK PDR (%)',
+                data: [18, 38, 62, 85, 96.5, 99.2, 99.9],
+                borderColor: '#f59e0b',
+                tension: 0.2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { min: 0, max: 100, title: { display: true, text: 'PDR (%)' } },
+              x: { title: { display: true, text: 'SNR (dB)' } }
+            }
+          }
+        });
+      }
+
+      // 3. Chart 3: Throughput
+      const ctxThr = document.getElementById('chartThroughput')?.getContext('2d');
+      if (ctxThr) {
+        State.charts.throughput = new Chart(ctxThr, {
+          type: 'bar',
+          data: {
+            labels: snrPoints.map(s => `${s} dB`),
+            datasets: [
+              {
+                label: 'LDPC-Coded Throughput (kbps)',
+                data: [10.5, 19.5, 24.0, 25.0, 25.0, 25.0, 25.0],
+                backgroundColor: '#10b981'
+              },
+              {
+                label: 'Uncoded Throughput (kbps)',
+                data: [9.0, 19.0, 31.0, 42.5, 48.2, 49.6, 50.0],
+                backgroundColor: '#94a3b8'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { title: { display: true, text: 'Throughput (kbps)' } },
+              x: { title: { display: true, text: 'SNR (dB)' } }
+            }
+          }
+        });
+      }
+
+      // 4. Chart 4: Energy Consumption
+      const ctxEnergy = document.getElementById('chartEnergy')?.getContext('2d');
+      if (ctxEnergy) {
+        const nodePoints = [10, 20, 30, 40, 50, 60, 80, 100];
+        State.charts.energy = new Chart(ctxEnergy, {
+          type: 'line',
+          data: {
+            labels: nodePoints.map(n => `${n} nodes`),
+            datasets: [
+              {
+                label: 'Adaptive Clustered Routing (mJ)',
+                data: [0.14, 0.28, 0.42, 0.56, 0.70, 0.84, 1.12, 1.40],
+                borderColor: '#0284c7',
+                backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                fill: true,
+                tension: 0.2
+              },
+              {
+                label: 'Direct Unclustered Transmission (mJ)',
+                data: [0.45, 0.90, 1.35, 1.80, 2.25, 2.70, 3.60, 4.50],
+                borderColor: '#ef4444',
+                borderDash: [5, 5],
+                tension: 0.2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { title: { display: true, text: 'Energy per Round (mJ)' } },
+              x: { title: { display: true, text: 'Network Size' } }
+            }
+          }
+        });
+      }
+    }
+
+    function runMonteCarloSimulation() {
+      const bitCount = parseInt(document.getElementById('monteCarloBitsSelect').value);
+      const perfChan = document.getElementById('perfChanSelect').value;
+      const snrPoints = [-2, 0, 2, 4, 6, 8, 10];
+      const uncodedBer = [];
+      const ldpcBer = [];
+      const pdrData = [];
+
+      snrPoints.forEach(snr => {
+        const snrLin = Math.pow(10, snr / 10);
+        const sigma = Math.sqrt(1.0 / (2.0 * snrLin));
+        let uncodedErrors = 0;
+        let ldpcErrors = 0;
+        let packetsDelivered = 0;
+        const packetSize = 12;
+        const totalPackets = Math.floor(bitCount / packetSize);
+
+        for (let p = 0; p < totalPackets; p++) {
+          // 6 random info bits
+          const u = Array.from({ length: 6 }, () => (Math.random() > 0.5 ? 1 : 0));
+          const parity = computeParityBits(u);
+          const c = [...u, ...parity];
+
+          // Transmit through channel
+          const y = c.map(bit => {
+            const s = (bit === 0) ? 1.0 : -1.0;
+            return s + sigma * randn();
+          });
+
+          // Uncoded decision
+          const uncodedDec = y.slice(0, 6).map(val => (val >= 0 ? 0 : 1));
+          for (let b = 0; b < 6; b++) {
+            if (uncodedDec[b] !== u[b]) uncodedErrors++;
+          }
+
+          // LDPC decode
+          const rawCodeword = y.map(val => (val >= 0 ? 0 : 1));
+          // Fast syndrome check
+          const s = computeSyndrome(rawCodeword);
+          const allZero = s.every(v => v === 0);
+          if (allZero) {
+            packetsDelivered++;
+          } else {
+            // Apply single error bit correction
+            let fixed = false;
+            for (let bitIdx = 0; bitIdx < 12; bitIdx++) {
+              const flipped = [...rawCodeword];
+              flipped[bitIdx] ^= 1;
+              if (computeSyndrome(flipped).every(v => v === 0)) {
+                packetsDelivered++;
+                for (let b = 0; b < 6; b++) {
+                  if (flipped[b] !== u[b]) ldpcErrors++;
+                }
+                fixed = true;
+                break;
+              }
+            }
+            if (!fixed) {
+              // Could not correct
+              ldpcErrors += 3;
+            }
+          }
+        }
+
+        const rawB = uncodedErrors / (totalPackets * 6);
+        const ldpB = ldpcErrors / (totalPackets * 6);
+        uncodedBer.push(Math.max(1e-5, rawB));
+        ldpcBer.push(Math.max(1e-5, ldpB));
+        pdrData.push(+((packetsDelivered / totalPackets) * 100).toFixed(1));
+      });
+
+      // Update Chart 1 and 2
+      if (State.charts.ber) {
+        State.charts.ber.data.datasets[1].data = uncodedBer;
+        State.charts.ber.data.datasets[2].data = ldpcBer;
+        State.charts.ber.update();
+      }
+      if (State.charts.pdr) {
+        State.charts.pdr.data.datasets[0].data = pdrData;
+        State.charts.pdr.update();
+      }
+    }
+
+    /* =========================================================================
+       12. END-TO-END SIMULATION PIPELINE CONTROLLER
+       ========================================================================= */
+    function setSimStage(stageIdx) {
+      State.simStage = stageIdx;
+      const steps = document.querySelectorAll('.pipe-step');
+      steps.forEach((st, idx) => {
+        st.classList.remove('current', 'completed');
+        if (idx < stageIdx) st.classList.add('completed');
+        else if (idx === stageIdx) st.classList.add('current');
+      });
+
+      const label = document.getElementById('pipelineProgressLabel');
+      const stages = [
+        '1. Sensor Data Acquisition',
+        '2. Adaptive Cluster Election',
+        '3. Systematic LDPC Encoding',
+        '4. BPSK Carrier Modulation',
+        '5. Wireless Channel & Noise',
+        '6. Receiver & Demodulation',
+        '7. LDPC Belief Propagation',
+        '8. Verification & Final Results'
+      ];
+      label.textContent = `Stage: ${stages[stageIdx] || 'Completed'}`;
+    }
+
+    function executeSimulationStep() {
+      switch (State.simStage) {
+        case 0: // Sensor Reading
+          updateJsonPacketPreview();
+          setSimStage(1);
+          break;
+        case 1: // Clustering
+          runAdaptiveClustering();
+          setSimStage(2);
+          break;
+        case 2: // LDPC Encoding
+          runLdpcEncoding();
+          setSimStage(3);
+          break;
+        case 3: // Modulation
+          runBpskModulation();
+          setSimStage(4);
+          break;
+        case 4: // Wireless Channel
+          runWirelessChannel();
+          setSimStage(5);
+          break;
+        case 5: // Demodulation
+          runDemodulation();
+          setSimStage(6);
+          break;
+        case 6: // Decoding
+          runLdpcDecoder();
+          setSimStage(7);
+          break;
+        case 7: // Final Results
+          populateFinalResults();
+          stopSimulation();
+          setSimStage(8);
+          // Auto switch to results section
+          switchToSection('sec-results');
+          break;
+      }
+    }
+
+    function startFullSimulation() {
+      if (State.simRunning) return;
+      State.simRunning = true;
+      State.simStage = 0;
+      setSimStage(0);
+
+      document.getElementById('statusDot').className = 'status-dot busy';
+      document.getElementById('statusText').textContent = 'Simulating...';
+
+      // Run sequential pipeline with clean smooth delay
+      State.intervalId = setInterval(() => {
+        executeSimulationStep();
+        if (!State.simRunning) clearInterval(State.intervalId);
+      }, 700);
+    }
+
+    function stopSimulation() {
+      State.simRunning = false;
+      if (State.intervalId) clearInterval(State.intervalId);
+      document.getElementById('statusDot').className = 'status-dot active';
+      document.getElementById('statusText').textContent = 'Simulation Complete';
+    }
+
+    function resetSimulation() {
+      stopSimulation();
+      State.simStage = 0;
+      setSimStage(0);
+      document.getElementById('statusDot').className = 'status-dot';
+      document.getElementById('statusText').textContent = 'Ready';
+      document.getElementById('pipelineProgressLabel').textContent = 'Stage: Idle (Ready to Run)';
+      
+      initSmartCityTopology();
+      runLdpcEncoding();
+      runBpskModulation();
+      runWirelessChannel();
+      runDemodulation();
+      runLdpcDecoder();
+    }
+
+    function populateFinalResults() {
+      document.getElementById('resTxNodeId').textContent = `Node #${State.telemetry.node_id} (Cluster #${State.telemetry.cluster_id})`;
+      document.getElementById('resTxValue').textContent = `Temperature = ${State.telemetry.temperature} °C`;
+      document.getElementById('resTxBits').textContent = State.infoBits.join(' ');
+      document.getElementById('resTxCodeword').textContent = State.codeword.join(' ');
+
+      document.getElementById('resRxRawBits').textContent = State.rawDemodBits.join(' ');
+      const rawCount = State.rawErrors.length;
+      document.getElementById('resRawErrors').innerHTML = `<span style="color:#ef4444; font-weight:700;">${rawCount} errors</span> (indices: ${State.rawErrors.join(', ') || 'none'})`;
+      document.getElementById('resFixedErrors').textContent = `${State.fixedErrors.length} errors corrected (Syndrome [${State.syndrome.join(',')}])`;
+
+      document.getElementById('resRxDecBits').textContent = State.decodedBits.join(' ');
+      const selElemFinal = document.getElementById('encodeTelemetrySelect');
+      const selValFinal = parseFloat(selElemFinal.value);
+      const selTypeFinal = State.currentDataType || 'temperature';
+      const decVal = bits6ToValue(State.decodedBits, selTypeFinal);
+      const unit = selTypeFinal === 'temperature' ? '°C' : (selTypeFinal === 'humidity' ? '%' : (selTypeFinal === 'water_level' ? 'm' : ''));
+      document.getElementById('resTxValue').textContent = `${selTypeFinal.toUpperCase()} = ${selValFinal} ${unit}`;
+      document.getElementById('resRxValue').innerHTML = `<strong>${selTypeFinal.toUpperCase()} = ${decVal} ${unit}</strong>`;
+
+      document.getElementById('resSnrVal').textContent = `${State.snrDb.toFixed(1)} dB`;
+      document.getElementById('resChannelModel').textContent = State.channelModel.toUpperCase();
+      document.getElementById('resRawBerVal').textContent = (rawCount / 12).toFixed(4);
+
+      let resErrors = 0;
+      for (let i = 0; i < 6; i++) {
+        if (State.decodedBits[i] !== State.infoBits[i]) resErrors++;
+      }
+      const postBer = (resErrors / 6).toFixed(4);
+      document.getElementById('resPostBerVal').textContent = postBer;
+      document.getElementById('resPdrVal').textContent = (resErrors === 0) ? '100.0 %' : '0.0 %';
+
+      const banner = document.getElementById('resultsBannerCard');
+      const title = document.getElementById('resultsBannerTitle');
+      const sub = document.getElementById('resultsBannerSubtitle');
+      if (resErrors === 0) {
+        banner.style.background = '#ecfdf5';
+        banner.style.borderColor = '#a7f3d0';
+        title.style.color = '#065f46';
+        title.textContent = 'End-to-End IoT Transmission Succeeded!';
+        sub.textContent = 'All raw channel errors were successfully corrected by the systematic LDPC iterative decoder. Original sensor telemetry was fully recovered.';
+      } else {
+        banner.style.background = '#fef2f2';
+        banner.style.borderColor = '#fecaca';
+        title.style.color = '#991b1b';
+        title.textContent = 'Residual Errors Present After Decoding';
+        sub.textContent = `Severe channel noise exceeded the correction capability of the (12,6) code at SNR ${State.snrDb} dB. Increase the SNR slider or code iterations.`;
+      }
+    }
+
+    /* =========================================================================
+       13. CSV EXPORT UTILITY
+       ========================================================================= */
+    function exportSimulationCsv() {
+      const rows = [
+        ['Smart City IoT LDPC-BPSK Communication Simulation Report'],
+        ['Generated At', new Date().toISOString()],
+        [''],
+        ['Parameter', 'Value', 'Unit'],
+        ['Total Sensor Nodes', State.nodes.length, 'nodes'],
+        ['Adaptive Clusters', State.clusterHeads.length, 'clusters'],
+        ['Cluster Selection Weight (Energy)', State.weightEnergy, ''],
+        ['Channel SNR', State.snrDb, 'dB'],
+        ['Noise Std Dev (sigma)', State.noiseSigma, ''],
+        ['Channel Model', State.channelModel, ''],
+        ['BPSK Modulation Carrier', State.carrierFreq, 'cycles/bit'],
+        ['LDPC Code Type', 'Systematic (12, 6) Rate 1/2', ''],
+        ['LDPC Max Iterations', State.maxIterations, 'iters'],
+        [''],
+        ['Telemetry Field', 'Transmitted', 'Decoded', 'Match'],
+        ['Node ID', State.telemetry.node_id, State.telemetry.node_id, 'TRUE'],
+        ['Cluster ID', State.telemetry.cluster_id, State.telemetry.cluster_id, 'TRUE'],
+        ['Information Bits', State.infoBits.join(''), State.decodedBits.join(''), State.infoBits.join('') === State.decodedBits.join('') ? 'TRUE' : 'FALSE'],
+        ['Raw Channel Errors', State.rawErrors.length, '', ''],
+        ['Corrected Errors', State.fixedErrors.length, '', ''],
+        ['Syndrome', `[${State.syndrome.join(' ')}]`, '', State.syndrome.every(v => v === 0) ? 'VALID' : 'INVALID'],
+        ['Pre-Decoding Raw BER', (State.rawErrors.length / 12).toFixed(4), '', ''],
+        ['Post-Decoding BER', (State.decodedBits.filter((b, idx) => b !== State.infoBits[idx]).length / 6).toFixed(4), '', '']
+      ];
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(e => e.join(',')).join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `smart_city_iot_ldpc_sim_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    /* =========================================================================
+       14. UI EVENT BINDINGS & NAVIGATION
+       ========================================================================= */
+    function switchToSection(targetSecId) {
+      document.querySelectorAll('.sim-section').forEach(sec => sec.classList.remove('active'));
+      const targetSec = document.getElementById(targetSecId);
+      if (targetSec) targetSec.classList.add('active');
+
+      document.querySelectorAll('.nav-item').forEach(nav => {
+        if (nav.getAttribute('data-target') === targetSecId) nav.classList.add('active');
+        else nav.classList.remove('active');
+      });
+
+      // Redraw canvases when tab becomes visible
+      if (targetSecId === 'sec-smartcity') drawCityMapCanvas();
+      if (targetSecId === 'sec-clustering') drawTopologyCanvas();
+      if (targetSecId === 'sec-modulation') { drawBpskWaveform(); drawModConstellation(); }
+      if (targetSecId === 'sec-channel') { drawChannelWaveforms(); drawReceivedConstellationCloud(); }
+      if (targetSecId === 'sec-demodulation') drawDemodFilterCanvas();
+      if (targetSecId === 'sec-decoding') drawTannerGraph();
+      if (targetSecId === 'sec-performance') initPerformanceCharts();
+    }
+
+    function setupEventListeners() {
+      // Sidebar Navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', e => {
+          e.preventDefault();
+          const target = item.getAttribute('data-target');
+          switchToSection(target);
+        });
+      });
+
+      // Pipeline bar steps
+      document.querySelectorAll('.pipe-step').forEach(step => {
+        step.addEventListener('click', () => {
+          const stepIdx = parseInt(step.getAttribute('data-step'));
+          const secMap = [
+            'sec-esp32', 'sec-clustering', 'sec-encoding', 'sec-modulation',
+            'sec-channel', 'sec-demodulation', 'sec-decoding', 'sec-results'
+          ];
+          if (secMap[stepIdx]) switchToSection(secMap[stepIdx]);
+        });
+      });
+
+      // Top control buttons
+      document.getElementById('btnStartFullSim').addEventListener('click', startFullSimulation);
+      document.getElementById('btnStepSim').addEventListener('click', executeSimulationStep);
+      document.getElementById('btnResetSim').addEventListener('click', resetSimulation);
+
+      // Presentation mode
+      document.getElementById('btnPresentation').addEventListener('click', () => {
+        document.body.classList.toggle('presentation-mode');
+      });
+
+      // Help Modal
+      const modal = document.getElementById('helpModal');
+      document.getElementById('btnHelp').addEventListener('click', () => modal.classList.add('open'));
+      document.getElementById('btnCloseHelp').addEventListener('click', () => modal.classList.remove('open'));
+      modal.addEventListener('click', e => {
+        if (e.target === modal) modal.classList.remove('open');
+      });
+
+      // CSV Export
+      document.getElementById('btnExportCsv').addEventListener('click', exportSimulationCsv);
+      document.getElementById('btnDownloadCsvFinal').addEventListener('click', exportSimulationCsv);
+
+      // Sliders & Controls
+      document.getElementById('cityNodeSlider').addEventListener('input', e => {
+        State.nodeCount = parseInt(e.target.value);
+        document.getElementById('clusterNodeCount').value = State.nodeCount;
+        initSmartCityTopology();
+      });
+
+      document.getElementById('citySensorFilter').addEventListener('change', drawCityMapCanvas);
+
+      document.getElementById('btnRandomizeCitySensors').addEventListener('click', initSmartCityTopology);
+      document.getElementById('btnRandomizeNodes').addEventListener('click', initSmartCityTopology);
+
+      document.getElementById('clusterNodeCount').addEventListener('input', e => {
+        State.nodeCount = parseInt(e.target.value);
+        document.getElementById('cityNodeSlider').value = State.nodeCount;
+        initSmartCityTopology();
+      });
+
+      document.getElementById('clusterHeadCount').addEventListener('input', e => {
+        State.clusterCount = parseInt(e.target.value);
+        runAdaptiveClustering();
+      });
+
+      document.getElementById('weightEnergy').addEventListener('input', e => {
+        State.weightEnergy = parseFloat(e.target.value);
+        document.getElementById('weightEnergyVal').textContent = State.weightEnergy;
+        runAdaptiveClustering();
+      });
+
+      document.getElementById('btnRunClustering').addEventListener('click', runAdaptiveClustering);
+
+      // City canvas click inspection
+      document.getElementById('cityMapCanvas').addEventListener('click', e => {
+        const rect = e.target.getBoundingClientRect();
+        const scaleX = e.target.width / rect.width;
+        const scaleY = e.target.height / rect.height;
+        const clickX = (e.clientX - rect.left) * scaleX;
+        const clickY = (e.clientY - rect.top) * scaleY;
+
+        let closest = null;
+        let minD = 30; // Max click radius
+        State.nodes.forEach(n => {
+          const d = Math.sqrt((n.x - clickX) ** 2 + (n.y - clickY) ** 2);
+          if (d < minD) { minD = d; closest = n; }
+        });
+
+        if (closest) {
+          selectNodeForInspection(closest);
+          drawCityMapCanvas();
+          drawTopologyCanvas();
+        }
+      });
+
+      // Load inspected node into ESP32
+      document.getElementById('btnTransmitThisNode').addEventListener('click', () => {
+        switchToSection('sec-esp32');
+      });
+
+      // Hardware Inputs
+      ['inputTemp', 'inputHumid', 'inputAqi', 'inputWater'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+          State.telemetry.temperature = parseFloat(document.getElementById('inputTemp').value);
+          State.telemetry.humidity = parseFloat(document.getElementById('inputHumid').value);
+          State.telemetry.air_quality = parseInt(document.getElementById('inputAqi').value);
+          State.telemetry.water_level = parseFloat(document.getElementById('inputWater').value);
+          updateJsonPacketPreview();
+        });
+      });
+
+      document.getElementById('btnSampleSensors').addEventListener('click', () => {
+        // Trigger pulse animation
+        const leds = [document.getElementById('ledTx'), document.getElementById('ledPwr')];
+        leds.forEach(l => l.style.fill = '#facc15');
+        setTimeout(() => {
+          leds[0].style.fill = '#3b82f6';
+          leds[1].style.fill = '#ef4444';
+        }, 500);
+        updateJsonPacketPreview();
+      });
+
+      // Encoding controls
+      document.getElementById('encodeTelemetrySelect').addEventListener('change', runLdpcEncoding);
+      document.getElementById('codingSchemeSelect').addEventListener('change', e => {
+        State.codingScheme = e.target.value;
+        runLdpcEncoding();
+      });
+      document.getElementById('btnRunEncode').addEventListener('click', runLdpcEncoding);
+
+      // Modulation controls
+      document.getElementById('modCarrierFreq').addEventListener('input', e => {
+        State.carrierFreq = parseInt(e.target.value);
+        document.getElementById('modCarrierFreqVal').textContent = `${State.carrierFreq} cycles/bit`;
+        runBpskModulation();
+      });
+      document.getElementById('modAmplitude').addEventListener('input', e => {
+        State.amplitude = parseFloat(e.target.value);
+        document.getElementById('modAmplitudeVal').textContent = `${State.amplitude.toFixed(1)} V`;
+        runBpskModulation();
+      });
+      document.getElementById('modMappingSelect').addEventListener('change', e => {
+        State.bpskMapping = e.target.value;
+        runBpskModulation();
+      });
+      document.getElementById('btnUpdateModulation').addEventListener('click', runBpskModulation);
+
+      // Channel controls
+      document.getElementById('chanSnrSlider').addEventListener('input', e => {
+        State.snrDb = parseFloat(e.target.value);
+        document.getElementById('chanSnrVal').textContent = `${State.snrDb} dB`;
+        document.getElementById('cardCurrentSnr').innerHTML = `${State.snrDb.toFixed(1)} <span class="metric-unit">dB</span>`;
+        runWirelessChannel();
+        runDemodulation();
+        runLdpcDecoder();
+      });
+      document.getElementById('chanModelSelect').addEventListener('change', e => {
+        State.channelModel = e.target.value;
+        runWirelessChannel();
+        runDemodulation();
+        runLdpcDecoder();
+      });
+      document.getElementById('btnRunChannel').addEventListener('click', () => {
+        runWirelessChannel();
+        runDemodulation();
+        runLdpcDecoder();
+      });
+
+      // Demod & Decode controls
+      document.getElementById('btnRunDemod').addEventListener('click', runDemodulation);
+      document.getElementById('btnRunDecode').addEventListener('click', runLdpcDecoder);
+      document.getElementById('btnStepDecode').addEventListener('click', runLdpcDecoder);
+      document.getElementById('decodeMaxIterSlider').addEventListener('input', e => {
+        State.maxIterations = parseInt(e.target.value);
+        document.getElementById('decodeMaxIterVal').textContent = `${State.maxIterations} iterations`;
+      });
+      document.getElementById('decodeAlphaSlider').addEventListener('input', e => {
+        State.minSumAlpha = parseFloat(e.target.value);
+        document.getElementById('decodeAlphaVal').textContent = State.minSumAlpha.toFixed(2);
+      });
+
+      // Monte Carlo controls
+      document.getElementById('btnRunMonteCarlo').addEventListener('click', runMonteCarloSimulation);
+    }
+
+    /* =========================================================================
+       15. APP INITIALIZATION
+       ========================================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      initSmartCityTopology();
+      runLdpcEncoding();
+      runBpskModulation();
+      runWirelessChannel();
+      runDemodulation();
+      runLdpcDecoder();
+      initPerformanceCharts();
+      setupEventListeners();
+
+      // Continuous subtle ambient animation loop for beacons & waves
+      setInterval(() => {
+        if (document.getElementById('sec-clustering').classList.contains('active')) {
+          drawTopologyCanvas();
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>

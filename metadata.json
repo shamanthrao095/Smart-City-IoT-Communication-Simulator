@@ -1,0 +1,6 @@
+{
+  "name": "Smart City IoT Communication Simulator",
+  "description": "Adaptive Cluster-Based Smart City IoT Communication Using LDPC-Coded BPSK: interactive digital communication, adaptive clustering, and channel simulation laboratory.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
